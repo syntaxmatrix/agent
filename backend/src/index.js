@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 
 dotenv.config({
-  path: "./.env.backend",
+  path: "../.env",
 });
 
 const app = express()
