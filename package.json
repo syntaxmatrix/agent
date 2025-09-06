@@ -12,7 +12,7 @@
     "dev:backend": "npm --prefix backend run dev",
     "build": "npm-run-all build:frontend build:backend",
     "build:frontend": "npm --prefix frontend run build",
-    "build:backend": "npm --prefix backend run build",
+    "build:backend": "npm --prefix backend run start",
     "test": "npm-run-all test:frontend test:backend",
     "test:frontend": "npm --prefix frontend test",
     "test:backend": "npm --prefix backend test",
