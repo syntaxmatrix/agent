@@ -5,118 +5,147 @@ import User from "../models/user.model.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
+//User Controllers
+
+/**
+ * Generates an access token and a refresh token for a given user.
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<{accessToken: string, refreshToken: string}>} An object containing the access and refresh tokens.
+ * @throws {APIError} If something goes wrong during token generation.
+ */
+const generateAccessAndRefreshTokens = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false }); // Save the new refresh token
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new APIError(
+      500,
+      "Went Wrong while generating refresh and access token"
+    );
+  }
+};
+
+/**
+ * Generates a random 6-digit verification code.
+ * @returns {string} The generated verification code.
+ */
+const genVerificationCode = () => {
+  return crypto.randomInt(100000, 999999).toString();
+};
+
+/**
+ * Checks the availability of an email address.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const checkEmailAvailability = asyncHandler(async (req, res) => {
+  const encodedEmail = req.query.email;
+
+  if (!encodedEmail) {
+    throw new APIError(404, "Email is Required to check");
+  }
+  const decodedEmail = decodeURIComponent(encodedEmail);
+
+  const foundUser = await User.findOne({ email: decodedEmail });
+
+  if (foundUser) {
+    return res.status(200).json({
+      message: "This Email ID is Already Registered with Us",
+      success: true,
+      status: 200,
+    });
+  } else {
+    return res.status(200).json({
+      message: "Email ID is Available",
+      success: true,
+      status: 200,
+    });
+  }
+});
+
 /**
  * Registers a new user.
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-// REGISTER USER
-const registerUser = async (req, res) => {
-  try {
-    const { username,  email, password} = req.body;
+const registerUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    // check if email or username exists
-    const exists = await User.findOne({ $or: [{ email }, { username }] });
-    if (exists) return res.status(400).json({ message: "Email or Username already in use" });
-
-    // verification + security code
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-    const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24h
-    const securityCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
-    
-    name = "rahul";;
-    subscription = "Free";
-    username ="jbdiknwknd";
-    const user = await User.create({
-      username,
-      name,
-      email,
-      password,
-      subscription,
-      securityCode,
-      verificationToken,
-      verificationTokenExpires
-    });
-    console.log("Registered User:", user);
-    console.log("TEST 1");
-
-    // In production, send verification email with token link
-    const verifyUrl = `${req.protocol}://${req.get('host')}/api/users/verify/${verificationToken}`;
-
-    res.status(201).json({
-      message: "User registered! Verify your email.",
-      verifyUrl,
-      securityCode // In production: send via email/SMS, not response
-    });
-
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error' });
+  // Validate input fields
+  if ([email, password].some((field) => !field?.trim())) {
+    throw new APIError(400, "All fields are required");
   }
-};
 
-// VERIFY EMAIL
-const verifyEmail = async (req, res) => {
-  try {
-    const { token } = req.params;
-    const user = await User.findOne({
-      verificationToken: token,
-      verificationTokenExpires: { $gt: Date.now() }
-    });
-
-    if (!user) return res.status(400).json({ message: "Invalid or expired token" });
-
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    user.verificationTokenExpires = undefined;
-    await user.save();
-
-    res.status(200).json({ message: "Email verified successfully!" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  // Check if user already exists
+  const existedUser = await User.findOne({ email });
+  if (existedUser) {
+    throw new APIError(409, "User already exists");
   }
-};
 
-// LOGIN USER
-const loginUser = async (req, res) => {
-  try {
-    const { usernameOrEmail, password, securityCode } = req.body;
+  const securityCode = genVerificationCode();
+  const securityCodeExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour expiry
 
-    const user = await User.findOne({
-      $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }]
-    });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+  //Generating tempToken for Registeration Process
+  const tempToken = jwt.sign(
+    { email }, // generating using email
+    process.env.SECRET,
+    { expiresIn: process.env.TEMP_TOKEN_EXPIRY }
+  );
 
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+  //Adding Default Name
+  const name = email.split(/[@.]/)[0];
+  const username = email.split(/[@.]/).join('');
 
-    if (!user.isVerified) {
-      return res.status(401).json({ message: "Verify your email first" });
-    }
+  // Create User
+  const user = await User.create({
+    name,
+    email,
+    password,
+    username,
+    securityCode,
+    securityCodeExpiry,
+  });
 
-    // Optional: check security code (like OTP/2FA)
-    if (securityCode && user.securityCode !== securityCode) {
-      return res.status(401).json({ message: "Invalid security code" });
-    }
+  console.log("Registered User:", user);
 
-    res.status(200).json({
-      message: "Login successful",
-      user: {
-        id: user._id,
-        username: user.username,
-        name: user.name,
-        email: user.email,
-        subscription: user.subscription
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  // Fetch created user without sensitive data
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken -inviteCode"
+  );
+  if (!createdUser) {
+    throw new APIError(500, "Unable to retrieve user data after registration");
   }
-};
+
+  // Cookie options for tempToken
+  const tempTokenCookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None", // critical for cross-origin cookies
+    maxAge: 1000 * 60 * 15, // 15 min expiry for tempToken
+  };
+  console.log("Regsiter Route End");
+  return res
+    .status(201)
+    .cookie("tempToken", tempToken, tempTokenCookieOptions)
+    .json(
+      new APIResponse(
+        200,
+        [],
+        "User registered successfully. Verification email sent."
+      )
+    );
+});
 
 
 export {
   registerUser,
-  verifyEmail,
-  loginUser,
+  checkEmailAvailability
 };
 
