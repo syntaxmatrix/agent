@@ -143,9 +143,39 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
+/**
+ * Checks the availability of a username.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const checkUsernameAvailability = asyncHandler(async (req, res) => {
+  const encodedUsername = req.query.username;
+
+  if (!encodedUsername) {
+    throw new APIError(404, "Username is Required to check");
+  }
+  const decodedUsername = decodeURIComponent(encodedUsername);
+
+  const foundUser = await User.findOne({ username : decodedUsername });
+
+  if (foundUser) {
+    return res.status(200).json({
+      message: "This Username is Already Registered with Us",
+      success: true,
+      status: 200,
+    });
+  } else {
+    return res.status(200).json({
+      message: "Username is Available",
+      success: true,
+      status: 200,
+    });
+  }
+});
 
 export {
   registerUser,
-  checkEmailAvailability
+  checkEmailAvailability,
+  checkUsernameAvailability
 };
 
