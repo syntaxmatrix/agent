@@ -1,6 +1,4 @@
 name: CI
-if: false
-
 on:
   pull_request:
     branches: [ main, dev ]
@@ -9,6 +7,7 @@ on:
 
 jobs:
   build:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +18,7 @@ jobs:
       - run: npm run build
 
   test:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
