@@ -50,10 +50,9 @@ cd bhindi-clone
 ```
 
 ### 2. Install Dependencies
-We use **pnpm workspaces**:
+We use **npm workspaces**:
 ```bash
-npm install -g pnpm
-pnpm install
+npm install -
 ```
 
 ### 3. Run with Docker

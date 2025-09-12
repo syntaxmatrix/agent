@@ -10,6 +10,7 @@ const app = express()
 
 app.listen(process.env.PORT, () => {
   console.log("Server is RUNNING at PORT :", process.env.PORT);
+  console.log(` Server Link : http://localhost:${process.env.PORT}`);
 });
 
 
