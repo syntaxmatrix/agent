@@ -45,8 +45,8 @@ bhindi-clone/
 
 ### 1. Clone Repo
 ```bash
-git clone https://github.com/<your-org>/bhindi-clone
-cd bhindi-clone
+git clone https://github.com/syntaxmatrix/agent.git
+cd agent
 ```
 
 ### 2. Install Dependencies
@@ -61,7 +61,7 @@ docker-compose up --build
 ```
 
 - Frontend → [http://localhost:3000](http://localhost:3000)  
-- Backend → [http://localhost:4000](http://localhost:4000)  
+- Backend → [http://localhost:8000](http://localhost:8000)  
 
 ---
 
@@ -95,13 +95,15 @@ Each service needs its own `.env`. Example:
 
 ```env
 # Common
+PORT = 8000
 OPENAI_API_KEY=sk-xxxx
-DATABASE_URL=postgres://user:password@localhost:5432/bhindi
+MONGODB_URI = "mongodb+srv://<username>:<password>@<cluster-name>.<db_domain>/?retryWrites=true&w=majority&appName=<cluster-name>"
+
 
 # Gmail Integration
 GMAIL_CLIENT_ID=xxxx
 GMAIL_CLIENT_SECRET=xxxx
-GMAIL_REDIRECT_URI=http://localhost:4000/auth/callback
+GMAIL_REDIRECT_URI=http://localhost:8000/auth/callback
 ```
 
 ---
