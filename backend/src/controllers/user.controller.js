@@ -4,6 +4,7 @@ import { APIResponse } from "../utils/APIResponse.js";
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import { sendVerificationEmail } from "../../../integrations/emails/email.resend.js";
 
 //User Controllers
 
@@ -113,7 +114,7 @@ const registerUser = asyncHandler(async (req, res) => {
     securityCodeExpiry,
   });
 
-  console.log("Registered User:", user);
+  console.log("Registered User:", user); /// #Remove Must  
 
   // Fetch created user without sensitive data
   const createdUser = await User.findById(user._id).select(
@@ -121,6 +122,18 @@ const registerUser = asyncHandler(async (req, res) => {
   );
   if (!createdUser) {
     throw new APIError(500, "Unable to retrieve user data after registration");
+  }
+
+  //Email Sending Using Resend
+  try {
+    await sendVerificationEmail(email, name, securityCode);
+    console.log(`Verification email sent to ${email}`);
+  } catch (err) {
+    console.error(`Email sending failed: ${err.message}`);
+    throw new APIError(
+      500,
+      "User registered but failed to send verification email"
+    );
   }
 
   // Cookie options for tempToken
@@ -138,7 +151,7 @@ const registerUser = asyncHandler(async (req, res) => {
       new APIResponse(
         200,
         [],
-        "User registered successfully. Verification email sent."
+        "User Registered Successfully. Verification Email Sent."
       )
     );
 });
@@ -173,9 +186,29 @@ const checkUsernameAvailability = asyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * Verify the Email ID of User.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const verifyEmailID = asyncHandler(async (req, res) => {
+  
+});
+
+/**
+ * Verify the Security Code(OTP) of User.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const verifySecurityCode = asyncHandler(async (req, res) => {
+  
+});
+
 export {
   registerUser,
   checkEmailAvailability,
-  checkUsernameAvailability
+  checkUsernameAvailability,
+  verifyEmailID,
+  verifySecurityCode
 };
 
