@@ -38,7 +38,6 @@ const userSchema = new Schema(
 );
 
 // Pre hooks
-
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 

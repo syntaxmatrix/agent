@@ -32,30 +32,6 @@ const sendVerificationEmail = async (email,name,verifyCode) => {
   }
 };
 
-// Function to send a inviteCode email
-const sendInviteCodeEmail = async (email,name,inviteCode) => {
-
-  // Email HTML template
-  const emailHTML = generateInviteCodeEmailHTML(name,email,inviteCode)
-
-  try {
-    const { data, error } = await resend.emails.send({
-      from: "Retube <noreply@retube.live>",
-      to: [email],
-      subject: "Retube | Invite Code",
-      html: emailHTML,
-    });
-
-    if (error) {
-      throw new APIError(500,error.message);
-    }
-
-    return { message: "inviteCode successfully", email };
-  } catch (err) {
-    throw new APIError(500,`Failed to send email: ${err.message}`);
-  }
-};
-
 // Function to send a primary user success email
 const sendWelcomeEmail = async (email,name) => {
 
