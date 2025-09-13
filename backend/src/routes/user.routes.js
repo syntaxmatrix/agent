@@ -3,6 +3,7 @@ import {
     registerUser,
     checkEmailAvailability,
     checkUsernameAvailability,
+    verifyEmailID
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -21,7 +22,7 @@ router.route("/register").post(registerUser);  // example.com/api/v1/user/regist
 // ## Unsecured Routes #Ends
 
 // VERIFY EMAIL #Semi-Secured Route
-// router.route("/verify/:token").get(verifyEmail);
+router.route("/verifyemail").post(verifyEmailID);  // example.com/api/v1/user/verifyemail
 
 // ## Secured Routes #Starts
 

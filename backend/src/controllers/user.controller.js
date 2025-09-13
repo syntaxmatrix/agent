@@ -192,7 +192,49 @@ const checkUsernameAvailability = asyncHandler(async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const verifyEmailID = asyncHandler(async (req, res) => {
-  
+  const tempToken = req.cookies?.tempToken;
+
+  if (!tempToken) {
+    throw new APIError(404, "No temp cookie found for verification.");
+  }
+  const decodeToken = jwt.verify(tempToken, process.env.SECRET);
+
+  const email = decodeToken.email;
+  const { securityCode } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new APIError(404, "User doesn't exist");
+  }
+
+  // Check if verification code is expired
+  const isCodeValid =
+    user.securityCodeExpiry && user.securityCodeExpiry > Date.now();
+  if (!isCodeValid) {
+    throw new APIError(400, `Verification code validity expired ${Date.now()}`);
+  }
+
+  // Check if verify code is correct & not expired
+  if (user.securityCode === securityCode) {
+    user.isVerified = true;
+    user.securityCode = null;
+    user.securityCode = null;
+
+    // Save changes to database
+    await user.save({ validateBeforeSave: false }); // Set validateBeforeSave to false if verifyCode/Expiry are being unset
+
+    return res
+      .status(200)
+      .json(
+        new APIResponse(
+          200,
+          {},
+          "User is successfully verified"
+        )
+      );
+  }
+  throw new APIError(400, "Invalid verification code");
 });
 
 /**
