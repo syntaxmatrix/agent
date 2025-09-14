@@ -1,7 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-
+import session from "express-session";
 const app = express();
 
 app.set("trust proxy", 1);

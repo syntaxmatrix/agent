@@ -5,6 +5,7 @@ import {
     checkUsernameAvailability,
     verifyEmailID
 } from "../controllers/user.controller.js";
+import {getGoogleAuthURL} from "../integrations/Auth/auth.google.js"
 
 const router = Router();
 

@@ -1,14 +1,6 @@
-
 import { google } from 'googleapis';
 import crypto from 'crypto';
-import session from 'express-session';
-
-
-/**
- * To use OAuth2 authentication, we need access to a CLIENT_ID, CLIENT_SECRET, AND REDIRECT_URI.
- * To get these credentials for your application, visit
- * https://console.cloud.google.com/apis/credentials.
- */
+import {asyncHandler} from "../../utils/asyncHandler.js"
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
@@ -21,22 +13,8 @@ const scopes = [
   "https://www.googleapis.com/auth/userinfo.profile",
   "openid"
 ];
-
-/* Global variable that stores user credential in this code example.
- * ACTION ITEM for developers:
- *   Store user's refresh token in your data store if
- *   incorporating this code into your real app.
- *   For more information on handling refresh tokens,
- *   see https://github.com/googleapis/google-api-nodejs-client#handling-refresh-tokens
- */
-
-
-
-
-
-
   // Example on redirecting user to Google's OAuth 2.0 server.
-  const getGoogleAuthURL = (req , res) => {
+  const getGoogleAuthURL = asyncHandler((req , res) => {
     // Generate a secure random state value.
     const state = crypto.randomBytes(32).toString('hex');
     // Store state in the session
@@ -56,6 +34,6 @@ const scopes = [
     });
 
     res.redirect(authorizationUrl);
-  };
+  });
 
   export { getGoogleAuthURL };

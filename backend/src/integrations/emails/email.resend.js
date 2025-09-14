@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import { Resend } from "resend";
 import {
   generateVerificationEmailHTML,
@@ -5,8 +6,14 @@ import {
  } from "./email.html.js";
 import { APIError } from "../../utils/APIError.js";
 
+dotenv.config({
+  path: "../.env",
+});
+
+const RESENDKEY = process.env.RESEND_API_KEY
+
 // Load API key securely from environment variables
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(RESENDKEY);
 
 // Function to send a verification email
 const sendVerificationEmail = async (email,name,verifyCode) => {
@@ -16,7 +23,7 @@ const sendVerificationEmail = async (email,name,verifyCode) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Agent <noreply@retube.live>",
+      from: "Agent <noreply@tabish.tech>",
       to: [email],
       subject: "Agent | Verification Code",
       html: emailHTML,
@@ -40,7 +47,7 @@ const sendWelcomeEmail = async (email,name) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Agent <noreply@retube.live>",
+      from: "Agent <noreply@tabish.tech>",
       to: [email],
       subject: "Agent | Successful Registration",
       html: emailHTML,
