@@ -3,7 +3,7 @@ import {
   generateVerificationEmailHTML,
   generateWelcomeEmailHTML
  } from "./email.html.js";
-import { APIError } from "../../backend/src/utils/APIError.js";
+import { APIError } from "../../utils/APIError.js";
 
 // Load API key securely from environment variables
 const resend = new Resend(process.env.RESEND_API_KEY);

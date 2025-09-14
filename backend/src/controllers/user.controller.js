@@ -4,7 +4,7 @@ import { APIResponse } from "../utils/APIResponse.js";
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { sendVerificationEmail } from "../../../integrations/emails/email.resend.js";
+import { sendVerificationEmail } from "../integrations/emails/email.resend.js";
 
 //User Controllers
 
