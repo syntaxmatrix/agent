@@ -11,6 +11,7 @@ const sampleApps = Array.from({ length: 8 }).map((_, i) => ({
   img: `/assets/apps/app${(i % 8) + 1}.png`,
 }));
 
+
 const HeaderCom: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
