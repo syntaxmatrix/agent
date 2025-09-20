@@ -30,9 +30,11 @@ router.route("/google").get(getGoogleAuthURL);  // example.com/api/v1/user/googl
 // ## Secured Routes #Starts
 
 // LOGIN USER
-// router.route("/login").post(loginUser);
+router.route("/login").post(loginUser); // example.com/api/v1/user/login
 
 // ## Secured Routes #Ends
+
+
 
 
 

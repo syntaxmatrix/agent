@@ -281,6 +281,7 @@ export {
   checkEmailAvailability,
   checkUsernameAvailability,
   verifyEmailID,
-  verifySecurityCode
+  verifySecurityCode,
+  loginUser
 };
 
