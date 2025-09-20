@@ -246,6 +246,36 @@ const verifySecurityCode = asyncHandler(async (req, res) => {
   
 });
 
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new APIError(400, "Email and password are required");
+  }
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    throw new APIError(401, "Invalid email or password");
+  }
+
+  const isMatch = await user.matchPassword(password);
+
+  if (!isMatch) {
+    throw new APIError(401, "Invalid email or password");
+  }
+
+  // Generate JWT
+  const token = user.generateAuthToken();
+
+  return res.status(200).json({
+    message: "Login successful",
+    success: true,
+    token,
+  });
+});
+
+
 export {
   registerUser,
   checkEmailAvailability,
