@@ -5,6 +5,7 @@ import {
     checkUsernameAvailability,
     verifyEmailID
 } from "../controllers/user.controller.js";
+import {getGoogleAuthURL} from "../integrations/Auth/auth.google.js"
 
 const router = Router();
 
@@ -24,12 +25,15 @@ router.route("/register").post(registerUser);  // example.com/api/v1/user/regist
 // VERIFY EMAIL #Semi-Secured Route
 router.route("/verifyemail").post(verifyEmailID);  // example.com/api/v1/user/verifyemail
 
+// GOOGLE OAUTH2 LOGIN
+router.route("/google").get(getGoogleAuthURL);  // example.com/api/v1/user/google
 // ## Secured Routes #Starts
 
 // LOGIN USER
 // router.route("/login").post(loginUser);
 
 // ## Secured Routes #Ends
+
 
 
 export default router;
