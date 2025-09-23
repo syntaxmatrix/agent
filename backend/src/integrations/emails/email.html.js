@@ -59,12 +59,9 @@ const generateVerificationEmailHTML = (name, verifyCode) => {
 };
 
 const generateWelcomeEmailHTML = (name) => {
-  return`
+  return `
   HI Test
-  `
+  `;
 };
 
-export{
-  generateVerificationEmailHTML,
-  generateWelcomeEmailHTML
-};
+export { generateVerificationEmailHTML, generateWelcomeEmailHTML };

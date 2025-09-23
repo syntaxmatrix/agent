@@ -34,6 +34,15 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 /**
+ * Default cookies options.
+ */
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+};
+
+/**
  * Generates a random 6-digit verification code.
  * @returns {string} The generated verification code.
  */
@@ -102,7 +111,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //Adding Default Name
   const name = email.split(/[@.]/)[0];
-  const username = email.split(/[@.]/).join('');
+  const username = email.split(/[@.]/).join("");
 
   // Create User
   const user = await User.create({
@@ -114,7 +123,7 @@ const registerUser = asyncHandler(async (req, res) => {
     securityCodeExpiry,
   });
 
-  console.log("Registered User:", user); /// #Remove Must  
+  console.log("Registered User:", user); /// #Remove Must
 
   // Fetch created user without sensitive data
   const createdUser = await User.findById(user._id).select(
@@ -169,7 +178,7 @@ const checkUsernameAvailability = asyncHandler(async (req, res) => {
   }
   const decodedUsername = decodeURIComponent(encodedUsername);
 
-  const foundUser = await User.findOne({ username : decodedUsername });
+  const foundUser = await User.findOne({ username: decodedUsername });
 
   if (foundUser) {
     return res.status(200).json({
@@ -226,13 +235,7 @@ const verifyEmailID = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(
-        new APIResponse(
-          200,
-          {},
-          "User is successfully verified"
-        )
-      );
+      .json(new APIResponse(200, {}, "User is successfully verified"));
   }
   throw new APIError(400, "Invalid verification code");
 });
@@ -242,10 +245,13 @@ const verifyEmailID = asyncHandler(async (req, res) => {
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-const verifySecurityCode = asyncHandler(async (req, res) => {
-  
-});
+const verifySecurityCode = asyncHandler(async (req, res) => {});
 
+/**
+ * Login with Email and Passwords.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -256,25 +262,26 @@ const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
-    throw new APIError(401, "Invalid email or password");
+    throw new APIError(401, "Invalid email or user doesn't exist");
   }
 
-  const isMatch = await user.matchPassword(password);
+  const isMatchPassword = await user.isPasswordCorrect(password);
 
-  if (!isMatch) {
-    throw new APIError(401, "Invalid email or password");
+  if (!isMatchPassword) {
+    throw new APIError(401, "Invalid Password");
   }
 
-  // Generate JWT
-  const token = user.generateAuthToken();
+  // Generate accessToken, refreshToken
+  const { accessToken, refreshToken } = generateAccessAndRefreshTokens(
+    user._id
+  );
 
-  return res.status(200).json({
-    message: "Login successful",
-    success: true,
-    token,
-  });
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(new APIResponse(200, {}, "You are successfully Logged In "));
 });
-
 
 export {
   registerUser,
@@ -282,6 +289,5 @@ export {
   checkUsernameAvailability,
   verifyEmailID,
   verifySecurityCode,
-  loginUser
+  loginUser,
 };
-

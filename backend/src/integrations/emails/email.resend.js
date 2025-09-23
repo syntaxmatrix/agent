@@ -2,24 +2,23 @@ import dotenv from "dotenv";
 import { Resend } from "resend";
 import {
   generateVerificationEmailHTML,
-  generateWelcomeEmailHTML
- } from "./email.html.js";
+  generateWelcomeEmailHTML,
+} from "./email.html.js";
 import { APIError } from "../../utils/APIError.js";
 
 dotenv.config({
   path: "../.env",
 });
 
-const RESENDKEY = process.env.RESEND_API_KEY
+const RESENDKEY = process.env.RESEND_API_KEY;
 
 // Load API key securely from environment variables
 const resend = new Resend(RESENDKEY);
 
 // Function to send a verification email
-const sendVerificationEmail = async (email,name,verifyCode) => {
-
+const sendVerificationEmail = async (email, name, verifyCode) => {
   // Email HTML template
-  const emailHTML = generateVerificationEmailHTML(name,verifyCode)
+  const emailHTML = generateVerificationEmailHTML(name, verifyCode);
 
   try {
     const { data, error } = await resend.emails.send({
@@ -30,20 +29,19 @@ const sendVerificationEmail = async (email,name,verifyCode) => {
     });
 
     if (error) {
-      throw new APIError(500,error.message);
+      throw new APIError(500, error.message);
     }
 
     return { message: "OTP sent successfully", email };
   } catch (err) {
-    throw new APIError(500,`Failed to send email: ${err.message}`);
+    throw new APIError(500, `Failed to send email: ${err.message}`);
   }
 };
 
 // Function to send a primary user success email
-const sendWelcomeEmail = async (email,name) => {
-
+const sendWelcomeEmail = async (email, name) => {
   // Email HTML template
-  const emailHTML = generateWelcomeEmailHTML(name)
+  const emailHTML = generateWelcomeEmailHTML(name);
 
   try {
     const { data, error } = await resend.emails.send({
@@ -54,16 +52,16 @@ const sendWelcomeEmail = async (email,name) => {
     });
 
     if (error) {
-      throw new APIError(500,error.message);
+      throw new APIError(500, error.message);
     }
 
     return { message: "regsitration/welcome email sent successfully", email };
   } catch (err) {
-    throw new APIError(500,`Failed to send to user welcome email: ${err.message}`);
+    throw new APIError(
+      500,
+      `Failed to send to user welcome email: ${err.message}`
+    );
   }
 };
 
-export { 
-  sendVerificationEmail,
-  sendWelcomeEmail,
-};
+export { sendVerificationEmail, sendWelcomeEmail };
