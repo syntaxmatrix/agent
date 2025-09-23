@@ -1,7 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-
+import session from "express-session";
 const app = express();
 
 app.set("trust proxy", 1);
@@ -27,21 +27,29 @@ app.get("/api/v1/hello", (req, res) => {
   res.json({ message: "Agent's Express Backend is Connected with You !" });
 });
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
   res.send(`
     Backend API running 🚀
-`);});
+`);
+});
 
 app.use(express.json({ limit: "20kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+app.use(
+  session({
+    secret: process.env.SECRET, // Replace with a strong secret
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
 //routes import
 import userRouter from "./routes/user.routes.js";
 
 //routes declarations
 app.use("/api/v1/user", userRouter); // example.com/api/v1/user/register
-
 
 export { app };

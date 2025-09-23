@@ -17,7 +17,7 @@ const userSchema = new Schema(
       match:
         /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g,
     },
-    username : {type : String , required : true , unique : true , index : true },
+    username: { type: String, required: true, unique: true, index: true },
     password: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
     securityCode: { type: String, default: null },
@@ -28,7 +28,10 @@ const userSchema = new Schema(
       enum: ["Free", "Premium", "Ultimate"],
       default: "Free",
     },
-    subscriptionExpiry: { type: Date, default: () => new Date(Date.now() + ONE_YEAR_MS) },
+    subscriptionExpiry: {
+      type: Date,
+      default: () => new Date(Date.now() + ONE_YEAR_MS),
+    },
     chatHistory: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Chat", default: null },
     ],

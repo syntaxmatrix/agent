@@ -1,10 +1,10 @@
-import { asyncHandler } from "../utils/asynchandler.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { sendVerificationEmail } from "../../../integrations/emails/email.resend.js";
+import { sendVerificationEmail } from "../integrations/emails/email.resend.js";
 
 //User Controllers
 
@@ -31,6 +31,15 @@ const generateAccessAndRefreshTokens = async (userId) => {
       "Went Wrong while generating refresh and access token"
     );
   }
+};
+
+/**
+ * Default cookies options.
+ */
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
 };
 
 /**
@@ -102,7 +111,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //Adding Default Name
   const name = email.split(/[@.]/)[0];
-  const username = email.split(/[@.]/).join('');
+  const username = email.split(/[@.]/).join("");
 
   // Create User
   const user = await User.create({
@@ -114,7 +123,7 @@ const registerUser = asyncHandler(async (req, res) => {
     securityCodeExpiry,
   });
 
-  console.log("Registered User:", user); /// #Remove Must  
+  console.log("Registered User:", user); /// #Remove Must
 
   // Fetch created user without sensitive data
   const createdUser = await User.findById(user._id).select(
@@ -169,7 +178,7 @@ const checkUsernameAvailability = asyncHandler(async (req, res) => {
   }
   const decodedUsername = decodeURIComponent(encodedUsername);
 
-  const foundUser = await User.findOne({ username : decodedUsername });
+  const foundUser = await User.findOne({ username: decodedUsername });
 
   if (foundUser) {
     return res.status(200).json({
@@ -226,13 +235,7 @@ const verifyEmailID = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(
-        new APIResponse(
-          200,
-          {},
-          "User is successfully verified"
-        )
-      );
+      .json(new APIResponse(200, {}, "User is successfully verified"));
   }
   throw new APIError(400, "Invalid verification code");
 });
@@ -242,8 +245,42 @@ const verifyEmailID = asyncHandler(async (req, res) => {
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-const verifySecurityCode = asyncHandler(async (req, res) => {
-  
+const verifySecurityCode = asyncHandler(async (req, res) => {});
+
+/**
+ * Login with Email and Passwords.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new APIError(400, "Email and password are required");
+  }
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    throw new APIError(401, "Invalid email or user doesn't exist");
+  }
+
+  const isMatchPassword = await user.isPasswordCorrect(password);
+
+  if (!isMatchPassword) {
+    throw new APIError(401, "Invalid Password");
+  }
+
+  // Generate accessToken, refreshToken
+  const { accessToken, refreshToken } = generateAccessAndRefreshTokens(
+    user._id
+  );
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(new APIResponse(200, {}, "You are successfully Logged In "));
 });
 
 export {
@@ -251,6 +288,6 @@ export {
   checkEmailAvailability,
   checkUsernameAvailability,
   verifyEmailID,
-  verifySecurityCode
+  verifySecurityCode,
+  loginUser,
 };
-

@@ -24,3 +24,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.container{
+  width: 100vw;
+  min-height: 100vh;
+  background: #ced8ff;
+}
+.container{
+  width: 100%;
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 15px 7%;
+}
+
