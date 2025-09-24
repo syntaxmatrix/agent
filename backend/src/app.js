@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import session from "express-session";
+
 const app = express();
 
 app.set("trust proxy", 1);
@@ -48,8 +49,10 @@ app.use(
 
 //routes import
 import userRouter from "./routes/user.routes.js";
+import agentRouter from "./routes/agent.routes.js"
 
 //routes declarations
 app.use("/api/v1/user", userRouter); // example.com/api/v1/user/register
+app.use("/api/v1/agent", agentRouter); // example.com/api/v1/agent/test
 
 export { app };
