@@ -5,6 +5,7 @@ import {
   checkUsernameAvailability,
   verifyEmailID,
   loginUser,
+  logoutUser
 } from "../controllers/user.controller.js";
 import { getGoogleAuthURL } from "../integrations/Auth/auth.google.js";
 
@@ -33,6 +34,8 @@ router.route("/google").get(getGoogleAuthURL); // example.com/api/v1/user/google
 // LOGIN USER
 router.route("/login").post(loginUser); // example.com/api/v1/user/login
 
+// LOGOUT USER
+router.route("/logout").post(logoutUser); // example.com/api/v1/user/logout
 // ## Secured Routes #Ends
 
 export default router;

@@ -283,6 +283,31 @@ const loginUser = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, {}, "You are successfully Logged In "));
 });
 
+/**
+ * Logout User
+ * Clears all authentication cookies and invalidates refresh token
+ */
+const logoutUser = asyncHandler(async (req, res) => {
+  const userId = req.user?._id; // Assuming you have jwtAuthMiddleware to set req.user
+
+  if (userId) {
+    // Optionally invalidate refresh token in DB
+    await User.findByIdAndUpdate(
+      userId,
+      { refreshToken: null },
+      { validateBeforeSave: false }
+    );
+  }
+
+  // Clear cookies
+  res
+    .clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "None" })
+    .clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None" })
+    .clearCookie("tempToken", { httpOnly: true, secure: true, sameSite: "None" })
+    .status(200)
+    .json(new APIResponse(200, {}, "Successfully Logged Out"));
+});
+
 export {
   registerUser,
   checkEmailAvailability,
@@ -290,4 +315,5 @@ export {
   verifyEmailID,
   verifySecurityCode,
   loginUser,
+  logoutUser,
 };
