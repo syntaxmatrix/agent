@@ -6,10 +6,6 @@ import {
 } from "./email.html.js";
 import { APIError } from "../../utils/APIError.js";
 
-dotenv.config({
-  path: "../.env",
-});
-
 const RESENDKEY = process.env.RESEND_API_KEY;
 
 // Load API key securely from environment variables

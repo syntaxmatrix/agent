@@ -1,10 +1,12 @@
 import dotenv from "dotenv";
-import { app } from "./app.js";
-import connectDB from "./utils/dbConfig.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config({
-  path: "../.env",
-});
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
+const { app } = await import("./app.js");
+const { default: connectDB } = await import("./utils/dbConfig.js");
 
 // Connect to MongoDB and start the server
 connectDB()
