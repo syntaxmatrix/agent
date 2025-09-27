@@ -1,11 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-async function geminiParse(query) {
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: `
 You are a natural language parser. 
 Convert the following user query into a structured JSON object. 
 Follow these rules:
@@ -43,15 +35,4 @@ Follow these rules:
 
 - If no filters exist, return an empty object.
 
-User query: "${query}"
-    `,
-    config: {
-      thinkingConfig: {
-        thinkingBudget: 0, // Disables thinking
-      },
-    }
-  });
-  return response;
-}
-
-export { geminiParse };
+User query: "{{query}}"

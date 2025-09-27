@@ -1,16 +1,13 @@
 import { Router } from "express";
-import {funX} from "../agents/gemini.js";
+import { 
+    testfun,
+    parserController
+} from "../controllers/agent.controller.js";
 
 const router = Router();
 
-router.route("/test").get(async (req, res) => {  // example.com/api/v1/agent/test
-  try {
-    const text = await funX();
-    res.json({ ok: true, text });
-  } catch (err) {
-    console.error("/gen error", err);
-    res.status(500).json({ ok: false, error: err?.message || "Unknown error" });
-  }
-});
+router.route("/test").get(testfun); // GET :: example.com/api/v1/agent/test
+
+router.route("/ask").get(parserController); // GET :: example.com/api/v1/agent/ask?q=abc
 
 export default router;
