@@ -1,4 +1,4 @@
-// app/components/FeatureCards.tsx
+
 import React from "react";
 import { CategoryItem } from "../data/categoryData";
 

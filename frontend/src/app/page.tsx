@@ -1,6 +1,6 @@
 // app/page.tsx
 import React from "react";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Header";
 import Hero from "./components/Hero";
 import Features from "@/app/components/Features";
 import FeatureCards from "@/app/components/FeatureCards";
