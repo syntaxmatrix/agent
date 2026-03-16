@@ -61,15 +61,13 @@ async function GmailAgent(text, query){
   } else if(text.intent === "send_email"){
     const emailContent = await draftMail(query);
     // Handle send email logic using emailContent
-    return await sendgmail(/* auth */, text.entities.to, emailContent.subject, emailContent.body);
+    return await sendgmail(/* auth */ text.entities.to, emailContent.subject, emailContent.body);
   } else if(text.intent === "read_email"){
     // Handle read email logic
   } else {
     throw new APIError("Invalid intent for Gmail Agent");
   }
 }
-
-
 
 export {
     chatQ,
