@@ -4,7 +4,9 @@ import {
   checkEmailAvailability,
   checkUsernameAvailability,
   verifyEmailID,
-  verifySecurityCode,
+  sendSecurityCodeLogged,
+  sendSecurityCode,
+  passwordReset,
   loginUser,
   logoutUser,
   registerUserGoogle,
@@ -45,6 +47,9 @@ router.route("/google").get(getGoogleAuthURL); // example.com/api/v1/user/google
 // Google OAuth2 callback route
 router.route("/google/callback").get(registerUserGoogle); // example.com/api/v1/user/google/callback
 
+// PASSWORD RESET
+router.route("/passwordreset").post(passwordReset); // example.com/api/v1/user/passwordreset
+
 //#Semi-Secured Route #Ends
 
 // ## Secured Routes #Starts
@@ -52,6 +57,10 @@ router.route("/google/callback").get(registerUserGoogle); // example.com/api/v1/
 // LOGOUT USER
 router.route("/logout").post(auth_middleware,logoutUser); // example.com/api/v1/user/logout
 
+// SEND SECURITY CODE(OTP) TO USER
+router.route("/requestsecuritycode").post(auth_middleware,sendSecurityCodeLogged); // example.com/api/v1/user/requestsecuritycode
+
+// ## GOOGLE GMAIL OAUTH2 #Starts
 //Step 0: EMAIL ENCRYPTION FOR GOOGLE GMAIL OAUTH2
 router.route("/email").get(auth_middleware,getEncryptedEmail); // example.com/api/v1/user/email
 

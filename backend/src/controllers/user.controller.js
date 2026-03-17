@@ -247,13 +247,6 @@ const verifyEmailID = asyncHandler(async (req, res) => {
 });
 
 /**
- * Verify the Security Code(OTP) of User.
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- */
-const verifySecurityCode = asyncHandler(async (req, res) => {});
-
-/**
  * Login with Email and Passwords.
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
@@ -606,12 +599,129 @@ const gmailLink = asyncHandler(async (req, res) => {
   }
 });
 
+
+/**
+ * Sends Security code for Critical Actions(Logged Only).
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const sendSecurityCodeLogged = asyncHandler(async (req, res) => {
+  const user = req.user; // middleware incoming
+
+  console.log(user);
+
+  const email = user.email;
+  const name = user.name;
+
+  // Generate verification code
+  const verifyCodeGen = genVerificationCode();
+  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+
+  user.securityCode = verifyCodeGen;
+  user.securityCodeExpiry = verifyCodeExpiry;
+
+  await user.save({ validateBeforeSave: false }); // Save code in DB
+
+  // Sending verification email
+  try {
+    await sendVerificationEmail(email, name, verifyCodeGen);
+    console.log(`Verification email sent to ${email}`);
+  } catch (err) {
+    console.error(`Email sending failed: ${err.message}`);
+    throw new APIError(500, "Password Reset failed email");
+  }
+  console.log("Send Verification Code Route End");
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Verification Code sent Successfully"));
+});
+
+/**
+ * Sends Security code for Password Reset.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const sendSecurityCode = asyncHandler(async (req, res) => {
+  const email = req.body.email;
+
+  if (!email) {
+    throw new APIError(400, "Email is required to send security code");
+  }
+
+  console.log(user);
+
+  const name = email.split(/[@.]/)[0]; // Derive name from email for personalization
+
+  // Generate verification code
+  const verifyCodeGen = genVerificationCode();
+  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+
+  user.securityCode = verifyCodeGen;
+  user.securityCodeExpiry = verifyCodeExpiry;
+
+  await user.save({ validateBeforeSave: false }); // Save code in DB
+
+  // Sending verification email
+  try {
+    await sendSecurityCodeMail(email, name, verifyCodeGen);
+    console.log(`Security code email sent to ${email}`);
+  } catch (err) {
+    console.error(`Email sending failed: ${err.message}`);
+    throw new APIError(500, "Password Reset failed email");
+  }
+  console.log("Send Security Code Route End");
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Security Code sent Successfully"));
+});
+
+/**
+ * Password Reset.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const passwordReset = asyncHandler(async (req, res) => {
+  const user = req.user; // middleware incoming
+
+  const { password, securityCode } = req.body;
+
+  const freshUser = await User.findById(user._id);
+
+  if (!freshUser) {
+    throw new APIError(400, "User not found");
+  }
+  // Retrieve stored expiry from DB
+  const isCodeValid =
+    freshUser.securityCodeExpiry && freshUser.securityCodeExpiry > Date.now();
+  if (!isCodeValid) {
+    throw new APIError(400, "Verification code validity expired");
+  }
+
+  // Verify if entered code matches stored code
+  if (freshUser.securityCode !== securityCode) {
+    throw new APIError(400, "Invalid verification code");
+  }
+
+  // Updated password
+  freshUser.password = password;
+  freshUser.securityCode = null; // Removed verification code after use
+  freshUser.securityCodeExpiry = null;
+
+  await freshUser.save({ validateBeforeSave: false });
+  console.log("Password Reset Route End");
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Password changed successfully"));
+});
+
 export {
   registerUser,
   checkEmailAvailability,
   checkUsernameAvailability,
   verifyEmailID,
-  verifySecurityCode,
+  sendSecurityCodeLogged,
+  sendSecurityCode,
+  passwordReset,
   loginUser,
   logoutUser,
   registerUserGoogle,

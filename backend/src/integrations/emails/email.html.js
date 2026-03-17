@@ -64,4 +64,15 @@ const generateWelcomeEmailHTML = (name) => {
   `;
 };
 
-export { generateVerificationEmailHTML, generateWelcomeEmailHTML };
+
+const generateSecurityEmailHTML = (name, verifyCode) => {
+  return `
+  HI ${name}, Your Security Code is:
+  ${verifyCode}
+
+  Alert this is password forget security code, if you didn't request this, please ignore and secure your account.
+  `;
+}
+
+
+export { generateVerificationEmailHTML, generateWelcomeEmailHTML, generateSecurityEmailHTML };
