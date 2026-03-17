@@ -6,9 +6,11 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { sendVerificationEmail } from "../integrations/emails/email.resend.js";
 import { oauth2Client } from "../integrations/Auth/auth.google.js";
-import { oauth2ClientGmail } from "../integrations/Auth/auth.google.gmail.js";
+import { oauth2ClientGmail } from "../integrations/Auth/gmail.google.js";
 import url from "url";
 import { google } from "googleapis";
+import CryptoJS from "crypto-js";
+
 
 //User Controllers
 

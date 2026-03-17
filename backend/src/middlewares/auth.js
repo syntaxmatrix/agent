@@ -14,7 +14,7 @@ export const auth_middleware = asyncHandler(async (req, res, next) => {
 
   let decodedToken;
   try {
-    decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    decodedToken = jwt.verify(token, process.env.SECRET);
   } catch (error) {
     throw new APIError(401, "Invalid or Expired Access Token");
   }

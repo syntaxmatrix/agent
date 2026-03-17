@@ -10,7 +10,7 @@ export default function GoogleRedirect() {
   useEffect(() => {
     const fetchEmail = async () => {
       try {
-        const response = await axios.get("/api/users/email");
+        const response = await axios.get("/api/user/email");
         const foundEmail = response.data?.data?.email;
         if (foundEmail) {
           setEmail(foundEmail);

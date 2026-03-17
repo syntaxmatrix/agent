@@ -10,8 +10,8 @@ const oauth2ClientGmail = new google.auth.OAuth2(
 
 // Access scopes for two non-Sign-In scopes: Read-only Drive activity and Google Calendar.
 const gmailScopes = [
-  "https://www.googleapis.com/auth/gmail.readonly",
-  "https://www.googleapis.com/auth/gmail.send",
+  // "https://www.googleapis.com/auth/gmail.readonly",
+  "https://www.googleapis.com/auth/gmail.send"
 ];
 // Example on redirecting user to Google's OAuth 2.0 server.
 const getGmailAuthURL = asyncHandler((req, res) => {
