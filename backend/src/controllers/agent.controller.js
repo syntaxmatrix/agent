@@ -3,6 +3,7 @@ import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import { routeQuery ,chatQuery ,draftMail} from "../agents/gemini.js";
 import { sendgmail } from "../integrations/Google/gmail.js";
+import { oauth2Client } from "../integrations/Auth/auth.google.js";
 
 /**
  * Function to remove unwanted string to convert JSON.
@@ -61,7 +62,7 @@ async function GmailAgent(text, query){
   } else if(text.intent === "send_email"){
     const emailContent = await draftMail(query);
     // Handle send email logic using emailContent
-    return await sendgmail(/* auth */ text.entities.to, emailContent.subject, emailContent.body);
+    return await sendgmail(oauth2Client,text.entities.to, emailContent.subject, emailContent.body);
   } else if(text.intent === "read_email"){
     // Handle read email logic
   } else {

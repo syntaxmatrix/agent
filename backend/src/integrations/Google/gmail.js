@@ -1,8 +1,10 @@
 import { google } from "googleapis";
 
-
-
 async function sendgmail(auth, to, subject, body) {
+
+  // Generate new Google access token from refresh token
+  auth.setCredentials({ refresh_token: user.googleRefreshToken });
+  
   const gmail = google.gmail({ version: "v1", auth });
 
   const message = [
