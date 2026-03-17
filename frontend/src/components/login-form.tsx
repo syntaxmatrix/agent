@@ -43,7 +43,7 @@ export function LoginForm({
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
-          <Button variant="outline" type="button">
+          <Button variant="outline" type="button" onClick={() => window.location.href = "/google"}>
             <img src="/google.png" alt="Google" className="mr-2 h-4 w-4" />
             Login with Google
           </Button>

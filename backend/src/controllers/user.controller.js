@@ -517,7 +517,7 @@ const gmailLink = asyncHandler(async (req, res) => {
       throw new APIError(403, "State mismatch. Possible CSRF attack.");
     } else {
       // Get access and refresh tokens (if access_type is offline)
-      let { tokens } = await oauth2Client.getToken(q.code);
+      let { tokens } = await oauth2ClientGmail.getToken(q.code);
       oauth2ClientGmail.setCredentials(tokens);
 
       // console.log("googleToken received:", tokens); // #Only for Testing

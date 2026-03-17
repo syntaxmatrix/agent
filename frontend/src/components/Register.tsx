@@ -35,7 +35,7 @@ export function RegisterForm({
         {step === 1 && (
           <>
             <Field>
-              <Button variant="outline" type="button" onClick={() => window.location.href = "/register/google"}>
+              <Button variant="outline" type="button" onClick={() => window.location.href = "/google"}>
                 <img src="/google.png" alt="Google" className="mr-2 h-4 w-4" />
                 Register with Google
               </Button>
