@@ -34,6 +34,8 @@ router.route("/register").post(registerUser); // example.com/api/v1/user/registe
 // LOGIN USER
 router.route("/login").post(loginUser); // example.com/api/v1/user/login
 
+router.route("/otp").get(sendSecurityCode); // example.com/api/v1/user/requestsecuritycode
+
 // ## Unsecured Routes #Ends
 
 //#Semi-Secured Route #Starts
