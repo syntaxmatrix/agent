@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use client";
 import { useState } from "react";
 
@@ -9,16 +8,6 @@ export default function Home() {
     if (!query.trim()) return;
     alert("Your question: " + query);
   };
-=======
-// app/page.tsx
-import React from "react";
-import Navbar from "./components/Header";
-import Hero from "./components/Hero";
-import Features from "@/app/components/Features";
-import FeatureCards from "@/app/components/FeatureCards";
-import { landingData } from "@/app/data/landingData";
-import { categoryData } from "@/app/data/categoryData";
->>>>>>> a0fb7a80230e5d1f3da56a8c78da0abac2f5db7b
 
   return (
     <main>

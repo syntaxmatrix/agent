@@ -4,7 +4,7 @@ import { APIResponse } from "../utils/APIResponse.js";
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { sendVerificationEmail } from "../integrations/emails/email.resend.js";
+import { sendVerificationEmail , sendSecurityCodeMail } from "../integrations/emails/email.resend.js";
 import { oauth2Client } from "../integrations/Auth/auth.google.js";
 import { oauth2ClientGmail } from "../integrations/Auth/gmail.google.js";
 import url from "url";
@@ -271,9 +271,11 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   // Generate accessToken, refreshToken
-  const { accessToken, refreshToken } = generateAccessAndRefreshTokens(
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
     user._id
   );
+
+  console.log("Login Route End", "Generated Tokens: ", { accessToken, refreshToken });
 
   return res
     .status(200)
@@ -686,15 +688,21 @@ const sendSecurityCode = asyncHandler(async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const passwordReset = asyncHandler(async (req, res) => {
-  const user = req.user; // middleware incoming
+
+  const email = req.body.email;
+
+  if (!email) {
+    throw new APIError(400, "Email is required for password reset");
+  }
 
   const { password, securityCode } = req.body;
 
-  const freshUser = await User.findById(user._id);
+  const freshUser = await User.findOne({ email });
 
   if (!freshUser) {
     throw new APIError(400, "User not found");
   }
+  
   // Retrieve stored expiry from DB
   const isCodeValid =
     freshUser.securityCodeExpiry && freshUser.securityCodeExpiry > Date.now();

@@ -1,9 +1,9 @@
 import { google } from "googleapis";
 
-async function sendgmail(auth, to, subject, body) {
+async function sendgmail(auth, to, subject, body,googleRefreshToken) {
 
   // Generate new Google access token from refresh token
-  auth.setCredentials({ refresh_token: user.googleRefreshToken });
+  auth.setCredentials({ refresh_token: googleRefreshToken });
   
   const gmail = google.gmail({ version: "v1", auth });
 
