@@ -4,10 +4,16 @@ import {
   checkEmailAvailability,
   checkUsernameAvailability,
   verifyEmailID,
+  verifySecurityCode,
   loginUser,
-  logoutUser
+  logoutUser,
+  registerUserGoogle,
+  getEncryptedEmail,
+  gmailLink
 } from "../controllers/user.controller.js";
 import { getGoogleAuthURL } from "../integrations/Auth/auth.google.js";
+import { getGmailAuthURL } from "../integrations/Auth/gmail.google.js";
+import { getEmail } from "../middlewares/email.js";
 
 const router = Router();
 
@@ -29,6 +35,10 @@ router.route("/verifyemail").post(verifyEmailID); // example.com/api/v1/user/ver
 
 // GOOGLE OAUTH2 LOGIN
 router.route("/google").get(getGoogleAuthURL); // example.com/api/v1/user/google
+
+// Google OAuth2 callback route
+router.route("/google/callback").get(registerUserGoogle); // example.com/api/v1/user/google/callback
+
 // ## Secured Routes #Starts
 
 // LOGIN USER
@@ -36,6 +46,16 @@ router.route("/login").post(loginUser); // example.com/api/v1/user/login
 
 // LOGOUT USER
 router.route("/logout").post(logoutUser); // example.com/api/v1/user/logout
+
+//Step 0: EMAIL ENCRYPTION FOR GOOGLE GMAIL OAUTH2
+router.route("/email").get(getEncryptedEmail); // example.com/api/v1/user/email
+
+//Step 1: GOOGLE GMAIL OAUTH2 LOGIN
+router.route("/gmail").get(getEmail,getGmailAuthURL); // example.com/api/v1/user/gmail
+
+// Step 2: GOOGLE GMAIL OAUTH2 CALLBACK
+router.route("/gmail/callback").get(gmailLink); // example.com/api/v1/user/gmail/callback
+
 // ## Secured Routes #Ends
 
 export default router;

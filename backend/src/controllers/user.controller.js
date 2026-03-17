@@ -424,6 +424,181 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * Send Encrypted Email to frontend.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const getEncryptedEmail = asyncHandler(async (req, res) => {  // #Need to Remove
+  const secret = process.env.SECRET;
+
+  const accessToken = req.cookies?.accessToken;
+  if (!accessToken) {
+    throw new APIError(404, "No accessToken cookie found for Google Auth.");
+  }
+  const { email } = jwt.verify(accessToken, secret);
+
+  if (!email) {
+    throw new APIError(400, "Email ID is required");
+  }
+
+  //Basic email format validation (optional)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new APIError(400, "Invalid email format");
+  }
+
+  const encryptedEmail = CryptoJS.AES.encrypt(email, secret).toString();
+  return res
+    .status(200)
+    .json(
+      new APIResponse(
+        200,
+        { email: encryptedEmail },
+        "Successfully Encrypted Email for Googgle Auth"
+      )
+    );
+});
+
+
+/**
+ * Add Gmail Credentials to existing user.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const gmailLink = asyncHandler(async (req, res) => {
+  try {
+    // Log received session data for debugging
+    console.log(
+      "googleLink - req.session.emailForGoogleLink:",
+      req.session?.emailForGoogleLink
+    );
+    console.log("googleLink - req.session.state:", req.session?.state);
+    console.log("googleLink - req.query.state:", req.query?.state);
+
+    const email = req.session?.emailForGoogleLink; // Get email from session
+
+    if (!email) {
+      // Handle case where session data is missing or expired
+      console.error(
+        "gmailLink: Email not found in session. Session might be expired or not set."
+      );
+      throw new APIError(
+        401,
+        "Session data missing for Google Gmail linking. Please try registering again."
+      );
+    }
+
+    // Handle the OAuth 2.0 server response
+    let q = url.parse(req.url, true).query;
+
+    console.log("url query received:", q);
+
+    if (q.error) {
+      // An error response e.g. error=access_denied
+      console.error("Google Gmail OAuth Error:" + q.error);
+      throw new APIError(400, `Google Gmail OAuth Error: ${q.error}`);
+    }
+    // CSRF State verification
+    else if (q.state !== req.session.state) {
+      // Verify state value
+      console.error(
+        "State mismatch. Possible CSRF attack. Expected:",
+        req.session.state,
+        "Received:",
+        q.state
+      );
+      throw new APIError(403, "State mismatch. Possible CSRF attack.");
+    } else {
+      // Get access and refresh tokens (if access_type is offline)
+      let { tokens } = await oauth2Client.getToken(q.code);
+      oauth2Client.setCredentials(tokens);
+
+      // console.log("googleToken received:", tokens); // #Only for Testing
+
+      const googleRefreshToken = tokens?.refresh_token;
+      const googleAccessToken = tokens?.access_token;
+
+      if (!googleRefreshToken) {
+        throw new APIError(
+          405,
+          "Google Refresh Token Not Found in Google Response"
+        );
+      }
+      if (!googleAccessToken) {
+        throw new APIError(
+          405,
+          "Google Access Token Not Found in Google Response"
+        );
+      }
+      // // Check for required scopes
+      // if (
+      //   !tokens.scope.includes("https://www.googleapis.com/auth/youtube.upload")
+      // ) {
+      //   throw new APIError(
+      //     404,
+      //     "Failed: Required scope YouTube Upload is missing!"
+      //   );
+      // }
+
+      const user = await User.findOne({ email }); // Find user using email from session
+
+      if (!user) {
+        console.error(`User with email ${email} not found after Google OAuth.`);
+        throw new APIError(
+          404,
+          "User not found in database for Google Gmail linking email."
+        );
+      }
+
+      // END OF SECTION
+
+      user.googleRefreshToken = googleRefreshToken; //Saving Google Refresh Token in MongoDB
+
+      const name = user.name;
+
+      const { accessToken, refreshToken } =
+        await generateAccessAndRefreshTokens(user._id);
+
+      await user.save({ validateBeforeSave: false }); // saving to db
+
+      // --- Clear session data after successful linking ---
+      if (req.session) {
+        req.session.emailForGoogleLink = undefined;
+        req.session.state = undefined; // Clear CSRF state
+        // req.session.destroy((err) => {
+        //     if (err) console.error("Error destroying session:", err);
+        // });
+      }
+
+      const options = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Lax",
+        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined
+      };
+      console.log("Linking Google Route End");
+      return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .redirect(`${process.env.FRONTEND_SUCCESS_URL}?linked=true`);
+    }
+  } catch (error) {
+    console.error("Error In Google Linking:", error);
+    // Redirect to a frontend error page with a helpful message
+    const errorMessage =
+      error instanceof APIError
+        ? error.message
+        : "An unexpected error occurred during Google linking.";
+    const statusCode = error instanceof APIError ? error.statusCode : 500;
+    return res
+      .status(statusCode)
+      .redirect(
+        `${process.env.FRONTEND_ERROR_URL}?error=${encodeURIComponent(errorMessage)}`
+      );
+  }
+});
 
 export {
   registerUser,
@@ -433,5 +608,7 @@ export {
   verifySecurityCode,
   loginUser,
   logoutUser,
-  registerUserGoogle
+  registerUserGoogle,
+  getEncryptedEmail,
+  gmailLink
 };
