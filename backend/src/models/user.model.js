@@ -9,6 +9,7 @@ const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 const userSchema = new Schema(
   {
     name: { type: String, required: true },
+    profileURL: { type: String, default: null },
     email: {
       type: String,
       unique: true,

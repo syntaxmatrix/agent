@@ -5,6 +5,12 @@ import User from "../models/user.model.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { sendVerificationEmail } from "../integrations/emails/email.resend.js";
+import { oauth2Client } from "../integrations/Auth/auth.google.js";
+import { oauth2ClientGmail } from "../integrations/Auth/gmail.google.js";
+import url from "url";
+import { google } from "googleapis";
+import CryptoJS from "crypto-js";
+
 
 //User Controllers
 
@@ -228,7 +234,7 @@ const verifyEmailID = asyncHandler(async (req, res) => {
   if (user.securityCode === securityCode) {
     user.isVerified = true;
     user.securityCode = null;
-    user.securityCode = null;
+    user.securityCodeExpiry = null;
 
     // Save changes to database
     await user.save({ validateBeforeSave: false }); // Set validateBeforeSave to false if verifyCode/Expiry are being unset
@@ -239,13 +245,6 @@ const verifyEmailID = asyncHandler(async (req, res) => {
   }
   throw new APIError(400, "Invalid verification code");
 });
-
-/**
- * Verify the Security Code(OTP) of User.
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- */
-const verifySecurityCode = asyncHandler(async (req, res) => {});
 
 /**
  * Login with Email and Passwords.
@@ -310,12 +309,427 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, {}, "Successfully Logged Out"));
 });
 
+/**
+ * Register/Login a new user using Google.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const registerUserGoogle = asyncHandler(async (req, res) => { 
+  try {
+    // Log received session data for debugging
+    // console.log("googleLink - req.session.state:", req.session?.state); #DebugOnly
+    // console.log("googleLink - req.query.state:", req.query?.state);  #DebugOnly
+
+    // Handle the OAuth 2.0 server response
+    let q = url.parse(req.url, true).query;
+
+    // console.log("url query received:", q);  #DebugOnly
+
+    if (q.error) {
+      // An error response e.g. error=access_denied
+      console.error("Google OAuth Error:" + q.error);
+      throw new APIError(400, `Google OAuth Error: ${q.error}`);
+    }
+    // CSRF State verification
+    else if (q.state !== req.session.state) {
+      // Verify state value
+      console.error(
+        "State mismatch. Possible CSRF attack. Expected:",
+        req.session.state,
+        "Received:",
+        q.state
+      );
+      throw new APIError(403, "State mismatch. Possible CSRF attack.");
+    } else {
+      // Get access and refresh tokens (if access_type is offline)
+      let { tokens } = await oauth2Client.getToken(q.code);
+      oauth2Client.setCredentials(tokens);
+
+      // console.log("googleToken received:", tokens);  #DebugOnly
+
+      const googleAccessToken = tokens?.access_token;
+
+      oauth2Client.setCredentials({ access_token: googleAccessToken });
+
+      const oauth2 = google.oauth2({
+        version: "v2",
+        auth: oauth2Client,
+      });
+
+      const userinfo = await oauth2.userinfo.get();
+      // console.log(userinfo.data);  #DebugOnly
+
+      const { email, name, picture, verified_email } = userinfo.data;
+
+      const userData = {
+        name,
+        email,
+        password: crypto.randomBytes(20).toString("hex"), // Generate a random password since it's required by the schema
+        username: email.split(/[@.]/).join(""), //Create a username by removing special characters from email
+        isVerified: verified_email,
+      };
+
+      const result = await User.findOneAndUpdate(
+        { email: email }, // The condition to find the user
+        {
+          $set: {
+            profileURL: picture,
+          },
+          $setOnInsert: userData
+        }, // The data to insert if the user doesn't exist
+        {
+          upsert: true, // This creates the document if it doesn't exist
+          new: true, // This returns the new document if created, or the existing one if found
+          setDefaultsOnInsert: true, // Applies your schema's default values on creation
+          includeResultMetadata: true, // Return the raw result from MongoDB to check if the document was created or found
+        }
+      );
+
+      console.log("Google OAuth User Upsert Result:", result); // #DebugOnly
+      // console.log("Google OAuth User Upsert ResultValue:", result.value); // #DebugOnly
+      // console.log("Google OAuth User Upsert ResultLastErrorObject:", result.lastErrorObject); // #DebugOnly
+      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(result.value._id);
+
+      // const createdUser = await User.findById(user._id);  // #DebugOnly
+
+      // console.log(createdUser,"ACC: ",accessToken); // #DebugOnly
+
+      const user = result.value;
+      let messageSuccess = "";
+
+      if (result.lastErrorObject?.updatedExisting === false) {
+        messageSuccess = "User Registered Successfully  with Google";
+      } else {
+        messageSuccess = "User Logged In Successfully";
+      }
+
+      return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .redirect(`${process.env.DOMAIN}?message=${encodeURIComponent(messageSuccess)}`);
+    }
+  } catch (error) {
+    console.error("Error In Google Linking:", error);
+    // Redirect to a frontend error page with a helpful message
+    const errorMessage =
+      error instanceof APIError
+        ? error.message
+        : "An unexpected error occurred during Google linking.";
+    const statusCode = error instanceof APIError ? error.statusCode : 500;
+    return res
+      .status(statusCode)
+      .redirect(`${process.env.DOMAIN}?message=${encodeURIComponent(errorMessage)}`);
+  }
+});
+
+/**
+ * Send Encrypted Email to frontend.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const getEncryptedEmail = asyncHandler(async (req, res) => {  // #Need to Remove
+  const secret = process.env.SECRET;
+
+  const accessToken = req.cookies?.accessToken;
+  if (!accessToken) {
+    throw new APIError(404, "No accessToken cookie found for Google Auth.");
+  }
+  const { email } = jwt.verify(accessToken, secret);
+
+  if (!email) {
+    throw new APIError(400, "Email ID is required");
+  }
+
+  //Basic email format validation (optional)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new APIError(400, "Invalid email format");
+  }
+
+  const encryptedEmail = CryptoJS.AES.encrypt(email, secret).toString();
+  return res
+    .status(200)
+    .json(
+      new APIResponse(
+        200,
+        { email: encryptedEmail },
+        "Successfully Encrypted Email for Googgle Auth"
+      )
+    );
+});
+
+
+/**
+ * Add Gmail Credentials to existing user.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const gmailLink = asyncHandler(async (req, res) => {
+  try {
+    // Log received session data for debugging
+    console.log(
+      "googleLink - req.session.emailForGoogleLink:",
+      req.session?.emailForGoogleLink
+    );
+    console.log("googleLink - req.session.state:", req.session?.state);
+    console.log("googleLink - req.query.state:", req.query?.state);
+
+    const email = req.session?.emailForGoogleLink; // Get email from session
+
+    if (!email) {
+      // Handle case where session data is missing or expired
+      console.error(
+        "gmailLink: Email not found in session. Session might be expired or not set."
+      );
+      throw new APIError(
+        401,
+        "Session data missing for Google Gmail linking. Please try registering again."
+      );
+    }
+
+    // Handle the OAuth 2.0 server response
+    let q = url.parse(req.url, true).query;
+
+    console.log("url query received:", q);
+
+    if (q.error) {
+      // An error response e.g. error=access_denied
+      console.error("Google Gmail OAuth Error:" + q.error);
+      throw new APIError(400, `Google Gmail OAuth Error: ${q.error}`);
+    }
+    // CSRF State verification
+    else if (q.state !== req.session.state) {
+      // Verify state value
+      console.error(
+        "State mismatch. Possible CSRF attack. Expected:",
+        req.session.state,
+        "Received:",
+        q.state
+      );
+      throw new APIError(403, "State mismatch. Possible CSRF attack.");
+    } else {
+      // Get access and refresh tokens (if access_type is offline)
+      let { tokens } = await oauth2ClientGmail.getToken(q.code);
+      oauth2ClientGmail.setCredentials(tokens);
+
+      // console.log("googleToken received:", tokens); // #Only for Testing
+
+      const googleRefreshToken = tokens?.refresh_token;
+      const googleAccessToken = tokens?.access_token;
+
+      if (!googleRefreshToken) {
+        throw new APIError(
+          405,
+          "Google Refresh Token Not Found in Google Response"
+        );
+      }
+      if (!googleAccessToken) {
+        throw new APIError(
+          405,
+          "Google Access Token Not Found in Google Response"
+        );
+      }
+      // // Check for required scopes
+      // if (
+      //   !tokens.scope.includes("https://www.googleapis.com/auth/youtube.upload")
+      // ) {
+      //   throw new APIError(
+      //     404,
+      //     "Failed: Required scope YouTube Upload is missing!"
+      //   );
+      // }
+
+      const user = await User.findOne({ email }); // Find user using email from session
+
+      if (!user) {
+        console.error(`User with email ${email} not found after Google OAuth.`);
+        throw new APIError(
+          404,
+          "User not found in database for Google Gmail linking email."
+        );
+      }
+
+      // END OF SECTION
+
+      user.googleRefreshToken = googleRefreshToken; //Saving Google Refresh Token in MongoDB
+
+      const name = user.name;
+
+      const { accessToken, refreshToken } =
+        await generateAccessAndRefreshTokens(user._id);
+
+      await user.save({ validateBeforeSave: false }); // saving to db
+
+      // --- Clear session data after successful linking ---
+      if (req.session) {
+        req.session.emailForGoogleLink = undefined;
+        req.session.state = undefined; // Clear CSRF state
+        // req.session.destroy((err) => {
+        //     if (err) console.error("Error destroying session:", err);
+        // });
+      }
+
+      const options = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Lax",
+        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined
+      };
+      console.log("Linking Google Route End");
+      return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .redirect(`${process.env.DOMAIN}?linked=true`);
+    }
+  } catch (error) {
+    console.error("Error In Google Linking:", error);
+    // Redirect to a frontend error page with a helpful message
+    const errorMessage =
+      error instanceof APIError
+        ? error.message
+        : "An unexpected error occurred during Google linking.";
+    const statusCode = error instanceof APIError ? error.statusCode : 500;
+    return res
+      .status(statusCode)
+      .redirect(
+        `${process.env.DOMAIN}?error=${encodeURIComponent(errorMessage)}`
+      );
+  }
+});
+
+
+/**
+ * Sends Security code for Critical Actions(Logged Only).
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const sendSecurityCodeLogged = asyncHandler(async (req, res) => {
+  const user = req.user; // middleware incoming
+
+  console.log(user);
+
+  const email = user.email;
+  const name = user.name;
+
+  // Generate verification code
+  const verifyCodeGen = genVerificationCode();
+  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+
+  user.securityCode = verifyCodeGen;
+  user.securityCodeExpiry = verifyCodeExpiry;
+
+  await user.save({ validateBeforeSave: false }); // Save code in DB
+
+  // Sending verification email
+  try {
+    await sendVerificationEmail(email, name, verifyCodeGen);
+    console.log(`Verification email sent to ${email}`);
+  } catch (err) {
+    console.error(`Email sending failed: ${err.message}`);
+    throw new APIError(500, "Password Reset failed email");
+  }
+  console.log("Send Verification Code Route End");
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Verification Code sent Successfully"));
+});
+
+/**
+ * Sends Security code for Password Reset.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const sendSecurityCode = asyncHandler(async (req, res) => {
+  const email = req.body.email;
+
+  if (!email) {
+    throw new APIError(400, "Email is required to send security code");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new APIError(404, "User with this email doesn't exist");
+  }
+
+  console.log(user);
+
+  const name = user.name;
+  // Generate verification code
+  const verifyCodeGen = genVerificationCode();
+  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+
+  user.securityCode = verifyCodeGen;
+  user.securityCodeExpiry = verifyCodeExpiry;
+
+  await user.save({ validateBeforeSave: false }); // Save code in DB
+
+  // Sending verification email
+  try {
+    await sendSecurityCodeMail(email, name, verifyCodeGen);
+    console.log(`Security code email sent to ${email}`);
+  } catch (err) {
+    console.error(`Email sending failed: ${err.message}`);
+    throw new APIError(500, "Password Reset failed email");
+  }
+  console.log("Send Security Code Route End");
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Security Code sent Successfully"));
+});
+
+/**
+ * Password Reset.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const passwordReset = asyncHandler(async (req, res) => {
+  const user = req.user; // middleware incoming
+
+  const { password, securityCode } = req.body;
+
+  const freshUser = await User.findById(user._id);
+
+  if (!freshUser) {
+    throw new APIError(400, "User not found");
+  }
+  // Retrieve stored expiry from DB
+  const isCodeValid =
+    freshUser.securityCodeExpiry && freshUser.securityCodeExpiry > Date.now();
+  if (!isCodeValid) {
+    throw new APIError(400, "Verification code validity expired");
+  }
+
+  // Verify if entered code matches stored code
+  if (freshUser.securityCode !== securityCode) {
+    throw new APIError(400, "Invalid verification code");
+  }
+
+  // Updated password
+  freshUser.password = password;
+  freshUser.securityCode = null; // Removed verification code after use
+  freshUser.securityCodeExpiry = null;
+
+  await freshUser.save({ validateBeforeSave: false });
+  console.log("Password Reset Route End");
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Password changed successfully"));
+});
+
 export {
   registerUser,
   checkEmailAvailability,
   checkUsernameAvailability,
   verifyEmailID,
-  verifySecurityCode,
+  sendSecurityCodeLogged,
+  sendSecurityCode,
+  passwordReset,
   loginUser,
   logoutUser,
+  registerUserGoogle,
+  getEncryptedEmail,
+  gmailLink
 };

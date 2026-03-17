@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import {
   generateVerificationEmailHTML,
   generateWelcomeEmailHTML,
+  generateSecurityEmailHTML
 } from "./email.html.js";
 import { APIError } from "../../utils/APIError.js";
 
@@ -21,6 +22,30 @@ const sendVerificationEmail = async (email, name, verifyCode) => {
       from: "Agent <noreply@tabish.tech>",
       to: [email],
       subject: "Agent | Verification Code",
+      html: emailHTML,
+    });
+
+    if (error) {
+      throw new APIError(500, error.message);
+    }
+
+    return { message: "OTP sent successfully", email };
+  } catch (err) {
+    throw new APIError(500, `Failed to send email: ${err.message}`);
+  }
+};
+
+// Function to send Security code for password reset Only.
+// Function to send a verification email
+const sendSecurityCodeMail = async (email, name, verifyCode) => {
+  // Email HTML template
+  const emailHTML = generateSecurityEmailHTML(name, verifyCode);
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "Agent <noreply@tabish.tech>",
+      to: [email],
+      subject: "Agent | Security Code",
       html: emailHTML,
     });
 
@@ -60,4 +85,4 @@ const sendWelcomeEmail = async (email, name) => {
   }
 };
 
-export { sendVerificationEmail, sendWelcomeEmail };
+export { sendVerificationEmail, sendWelcomeEmail, sendSecurityCodeMail };
