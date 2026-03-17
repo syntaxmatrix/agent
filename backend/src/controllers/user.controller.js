@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 import { sendVerificationEmail } from "../integrations/emails/email.resend.js";
 import { oauth2Client } from "../integrations/Auth/auth.google.js";
 import url from "url";
-
+import { google } from "googleapis";
 
 //User Controllers
 
@@ -389,7 +389,10 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
         }
       );
 
-      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+      console.log("Google OAuth User Upsert Result:", result); // #DebugOnly
+      // console.log("Google OAuth User Upsert ResultValue:", result.value); // #DebugOnly
+      // console.log("Google OAuth User Upsert ResultLastErrorObject:", result.lastErrorObject); // #DebugOnly
+      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(result._id);
 
       // const createdUser = await User.findById(user._id);  // #DebugOnly
 
@@ -408,7 +411,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
-    .json(new APIResponse(200, {}, messageSuccess));
+    .redirect(`${process.env.DOMAIN}?message=${encodeURIComponent(messageSuccess)}`);
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
