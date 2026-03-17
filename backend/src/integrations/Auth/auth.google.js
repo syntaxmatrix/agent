@@ -1,6 +1,8 @@
 import { google } from "googleapis";
 import crypto from "crypto";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+
+
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
@@ -23,7 +25,7 @@ const getGoogleAuthURL = asyncHandler((req, res) => {
   // Generate a url that asks permissions for the Drive activity and Google Calendar scope
   const authorizationUrl = oauth2Client.generateAuthUrl({
     // 'online' (default) or 'offline' (gets refresh_token)
-    access_type: "offline",
+    access_type: "online",
     /** Pass in the scopes array defined above.
      * Alternatively, if only one scope is needed, you can pass a scope URL as a string */
     scope: scopes,
@@ -36,4 +38,4 @@ const getGoogleAuthURL = asyncHandler((req, res) => {
   res.redirect(authorizationUrl);
 });
 
-export { getGoogleAuthURL };
+export { getGoogleAuthURL , oauth2Client ,scopes};

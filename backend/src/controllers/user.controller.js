@@ -5,6 +5,9 @@ import User from "../models/user.model.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { sendVerificationEmail } from "../integrations/emails/email.resend.js";
+import { oauth2Client } from "../integrations/Auth/auth.google.js";
+import url from "url";
+
 
 //User Controllers
 
@@ -228,7 +231,7 @@ const verifyEmailID = asyncHandler(async (req, res) => {
   if (user.securityCode === securityCode) {
     user.isVerified = true;
     user.securityCode = null;
-    user.securityCode = null;
+    user.securityCodeExpiry = null;
 
     // Save changes to database
     await user.save({ validateBeforeSave: false }); // Set validateBeforeSave to false if verifyCode/Expiry are being unset
@@ -310,6 +313,118 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, {}, "Successfully Logged Out"));
 });
 
+/**
+ * Register/Login a new user using Google.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const registerUserGoogle = asyncHandler(async (req, res) => { 
+  try {
+    // Log received session data for debugging
+    // console.log("googleLink - req.session.state:", req.session?.state); #DebugOnly
+    // console.log("googleLink - req.query.state:", req.query?.state);  #DebugOnly
+
+    // Handle the OAuth 2.0 server response
+    let q = url.parse(req.url, true).query;
+
+    // console.log("url query received:", q);  #DebugOnly
+
+    if (q.error) {
+      // An error response e.g. error=access_denied
+      console.error("Google OAuth Error:" + q.error);
+      throw new APIError(400, `Google OAuth Error: ${q.error}`);
+    }
+    // CSRF State verification
+    else if (q.state !== req.session.state) {
+      // Verify state value
+      console.error(
+        "State mismatch. Possible CSRF attack. Expected:",
+        req.session.state,
+        "Received:",
+        q.state
+      );
+      throw new APIError(403, "State mismatch. Possible CSRF attack.");
+    } else {
+      // Get access and refresh tokens (if access_type is offline)
+      let { tokens } = await oauth2Client.getToken(q.code);
+      oauth2Client.setCredentials(tokens);
+
+      // console.log("googleToken received:", tokens);  #DebugOnly
+
+      const googleAccessToken = tokens?.access_token;
+
+      oauth2Client.setCredentials({ access_token: googleAccessToken });
+
+      const oauth2 = google.oauth2({
+        version: "v2",
+        auth: oauth2Client,
+      });
+
+      const userinfo = await oauth2.userinfo.get();
+      // console.log(userinfo.data);  #DebugOnly
+
+      const { email, name, picture, verified_email } = userinfo.data;
+
+      const userData = {
+        name,
+        email,
+        password: crypto.randomBytes(20).toString("hex"), // Generate a random password since it's required by the schema
+        username: email.split(/[@.]/).join(""), //Create a username by removing special characters from email
+        isVerified: verified_email,
+      };
+
+      const result = await User.findOneAndUpdate(
+        { email: email }, // The condition to find the user
+        {
+          $set: {
+            profileURL: picture,
+          },
+          $setOnInsert: userData
+        }, // The data to insert if the user doesn't exist
+        {
+          upsert: true, // This creates the document if it doesn't exist
+          new: true, // This returns the new document if created, or the existing one if found
+          setDefaultsOnInsert: true, // Applies your schema's default values on creation
+          rawResult: true, // Return the raw result from MongoDB to check if the document was created or found
+        }
+      );
+
+      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+
+      // const createdUser = await User.findById(user._id);  // #DebugOnly
+
+      // console.log(createdUser,"ACC: ",accessToken); // #DebugOnly
+
+      const user = result.value;
+      let messageSuccess = "";
+
+      if (result.lastErrorObject.upserted) {
+        messageSuccess = "User Registered Successfully  with Google";
+      } else {
+        messageSuccess = "User Logged In Successfully";
+      }
+
+      return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(new APIResponse(200, {}, messageSuccess));
+    }
+  } catch (error) {
+    console.error("Error In Google Linking:", error);
+    // Redirect to a frontend error page with a helpful message
+    const errorMessage =
+      error instanceof APIError
+        ? error.message
+        : "An unexpected error occurred during Google linking.";
+    const statusCode = error instanceof APIError ? error.statusCode : 500;
+    return res
+      .status(statusCode)
+      .redirect(`${process.env.DOMAIN}?message=${encodeURIComponent(errorMessage)}`);
+  }
+});
+
+
 export {
   registerUser,
   checkEmailAvailability,
@@ -318,4 +433,5 @@ export {
   verifySecurityCode,
   loginUser,
   logoutUser,
+  registerUserGoogle
 };
