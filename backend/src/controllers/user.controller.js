@@ -648,10 +648,15 @@ const sendSecurityCode = asyncHandler(async (req, res) => {
     throw new APIError(400, "Email is required to send security code");
   }
 
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new APIError(404, "User with this email doesn't exist");
+  }
+
   console.log(user);
 
-  const name = email.split(/[@.]/)[0]; // Derive name from email for personalization
-
+  const name = user.name;
   // Generate verification code
   const verifyCodeGen = genVerificationCode();
   const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
