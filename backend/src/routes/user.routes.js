@@ -53,13 +53,13 @@ router.route("/google/callback").get(registerUserGoogle); // example.com/api/v1/
 router.route("/logout").post(auth_middleware,logoutUser); // example.com/api/v1/user/logout
 
 //Step 0: EMAIL ENCRYPTION FOR GOOGLE GMAIL OAUTH2
-router.route("/email").get(getEncryptedEmail); // example.com/api/v1/user/email
+router.route("/email").get(auth_middleware,getEncryptedEmail); // example.com/api/v1/user/email
 
 //Step 1: GOOGLE GMAIL OAUTH2 LOGIN
-router.route("/gmail").get(getEmail,getGmailAuthURL); // example.com/api/v1/user/gmail
+router.route("/gmail").get(auth_middleware,getEmail,getGmailAuthURL); // example.com/api/v1/user/gmail
 
 // Step 2: GOOGLE GMAIL OAUTH2 CALLBACK
-router.route("/gmail/callback").get(gmailLink); // example.com/api/v1/user/gmail/callback
+router.route("/gmail/callback").get(auth_middleware,gmailLink); // example.com/api/v1/user/gmail/callback
 
 // ## Secured Routes #Ends
 

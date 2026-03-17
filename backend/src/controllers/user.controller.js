@@ -6,6 +6,7 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { sendVerificationEmail } from "../integrations/emails/email.resend.js";
 import { oauth2Client } from "../integrations/Auth/auth.google.js";
+import { oauth2ClientGmail } from "../integrations/Auth/auth.google.gmail.js";
 import url from "url";
 import { google } from "googleapis";
 
@@ -385,14 +386,14 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
           upsert: true, // This creates the document if it doesn't exist
           new: true, // This returns the new document if created, or the existing one if found
           setDefaultsOnInsert: true, // Applies your schema's default values on creation
-          rawResult: true, // Return the raw result from MongoDB to check if the document was created or found
+          includeResultMetadata: true, // Return the raw result from MongoDB to check if the document was created or found
         }
       );
 
       console.log("Google OAuth User Upsert Result:", result); // #DebugOnly
       // console.log("Google OAuth User Upsert ResultValue:", result.value); // #DebugOnly
       // console.log("Google OAuth User Upsert ResultLastErrorObject:", result.lastErrorObject); // #DebugOnly
-      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(result._id);
+      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(result.value._id);
 
       // const createdUser = await User.findById(user._id);  // #DebugOnly
 
@@ -401,7 +402,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
       const user = result.value;
       let messageSuccess = "";
 
-      if (result.lastErrorObject.upserted) {
+      if (result.lastErrorObject?.updatedExisting === false) {
         messageSuccess = "User Registered Successfully  with Google";
       } else {
         messageSuccess = "User Logged In Successfully";
@@ -515,7 +516,7 @@ const gmailLink = asyncHandler(async (req, res) => {
     } else {
       // Get access and refresh tokens (if access_type is offline)
       let { tokens } = await oauth2Client.getToken(q.code);
-      oauth2Client.setCredentials(tokens);
+      oauth2ClientGmail.setCredentials(tokens);
 
       // console.log("googleToken received:", tokens); // #Only for Testing
 
@@ -585,7 +586,7 @@ const gmailLink = asyncHandler(async (req, res) => {
         .status(200)
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
-        .redirect(`${process.env.FRONTEND_SUCCESS_URL}?linked=true`);
+        .redirect(`${process.env.DOMAIN}?linked=true`);
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -598,7 +599,7 @@ const gmailLink = asyncHandler(async (req, res) => {
     return res
       .status(statusCode)
       .redirect(
-        `${process.env.FRONTEND_ERROR_URL}?error=${encodeURIComponent(errorMessage)}`
+        `${process.env.DOMAIN}?error=${encodeURIComponent(errorMessage)}`
       );
   }
 });

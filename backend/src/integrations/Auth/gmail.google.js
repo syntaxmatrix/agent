@@ -1,6 +1,12 @@
+import { google } from "googleapis";
 import crypto from "crypto";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { oauth2Client } from "./auth.google.js";
+
+const oauth2ClientGmail = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GMAIL_REDIRECT_URI
+);
 
 // Access scopes for two non-Sign-In scopes: Read-only Drive activity and Google Calendar.
 const gmailScopes = [
@@ -24,7 +30,7 @@ const getGmailAuthURL = asyncHandler((req, res) => {
   });
 
   // Generate a url that asks permissions for the Drive activity and Google Calendar scope
-  const authorizationUrl = oauth2Client.generateAuthUrl({
+  const authorizationUrl = oauth2ClientGmail.generateAuthUrl({
     // 'online' (default) or 'offline' (gets refresh_token)
     access_type: "offline",
     /** Pass in the scopes array defined above.
@@ -39,4 +45,4 @@ const getGmailAuthURL = asyncHandler((req, res) => {
   res.redirect(authorizationUrl);
 });
 
-export { getGmailAuthURL, gmailScopes };
+export { getGmailAuthURL, gmailScopes ,oauth2ClientGmail};
