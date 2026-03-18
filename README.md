@@ -7,10 +7,10 @@ It’s inspired by **Bhindi AI** and built as a team project using a modular **m
 
 ## 🚀 Features
 - 🌐 **Frontend (Next.js)** → Chat-based UI.  
-- ⚙️ **Backend (Node.js / FastAPI)** → Orchestrates agents and APIs.  
-- 🤖 **Agents (LangChain / CrewAI)** → AI workers for tasks like email, GitHub, Slack.  
+- ⚙️ **Backend (Node.js)** → Orchestrates agents and APIs.  
+- 🤖 **Agents** → AI workers for tasks like email, GitHub, Slack.  
 - 🔌 **Integrations** → Secure app connectors (OAuth 2.0).  
-- 🗄️ **Database (PostgreSQL)** → Stores user data, tasks, and logs.  
+- 🗄️ **Database (MongoDB)** → Stores user data, tasks, and logs.  
 - 🐳 **Dockerized** → Local development ready.  
 - ✅ **CI/CD via GitHub Actions** → Auto testing + deployment.  
 
@@ -22,10 +22,11 @@ It’s inspired by **Bhindi AI** and built as a team project using a modular **m
 bhindi-clone/
 ├── frontend/          # Next.js UI
 ├── backend/           # API + agent orchestration
-├── agents/            # AI agents (Gmail, GitHub, etc.)
-├── integrations/      # App connectors
+   ├── src/
+      ├── agents/            # AI agents (Gmail, GitHub, etc.)
+      ├── integrations/      # App connectors
 ├── docs/              # Documentation
-├── tests/             # Shared tests
+<!-- ├── tests/             # Shared tests -->
 └── .github/           # CI/CD workflows
 ```
 
@@ -33,9 +34,9 @@ bhindi-clone/
 
 ## 🛠️ Tech Stack
 - **Frontend:** Next.js + Tailwind  
-- **Backend:** Node.js (Express) or Python (FastAPI)  
-- **Agents:** LangChain / CrewAI  
-- **Database:** PostgreSQL + pgvector  
+- **Backend:** Node.js (Express)
+- **Agents:** 
+- **Database:** MongoDB  
 - **Infra:** Docker + Docker Compose  
 - **CI/CD:** GitHub Actions  
 
@@ -104,13 +105,19 @@ MONGODB_URI = "mongodb+srv://<username>:<password>@<cluster-name>.<db_domain>/?r
 GMAIL_CLIENT_ID=xxxx
 GMAIL_CLIENT_SECRET=xxxx
 GMAIL_REDIRECT_URI=http://localhost:8000/auth/callback
+.....
+.....
+.....
+...more..to..be..added.....
+
 ```
 
 ---
 
 ## 📘 Documentation
-- [docs/architecture.md](./docs/architecture.md) → System Design  
-- [docs/contributing.md](./docs/contributing.md) → Contribution Guide  
+- Will be added soon
+<!-- - [docs/architecture.md](./docs/architecture.md) → System Design  
+- [docs/contributing.md](./docs/contributing.md) → Contribution Guide   -->
 
 ---
 
