@@ -91,6 +91,7 @@ const checkEmailAvailability = asyncHandler(async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const registerUser = asyncHandler(async (req, res) => {
+  // Incoming registration payload from frontend.
   const { email, password } = req.body;
 
   // Validate input fields
@@ -101,6 +102,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // Check if user already exists
   const existedUser = await User.findOne({ email });
   if (existedUser) {
+    // Block duplicate account creation for same email.
     throw new APIError(409, "User already exists");
   }
 
@@ -109,6 +111,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //Generating tempToken for Registeration Process
   const tempToken = jwt.sign(
+    // Store only email in temp token for OTP verification step.
     { email }, // generating using email
     process.env.SECRET,
     { expiresIn: process.env.TEMP_TOKEN_EXPIRY }
@@ -120,6 +123,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Create User
   const user = await User.create({
+    // Auto-derived defaults for first-time local registration.
     name,
     email,
     password,
@@ -140,6 +144,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //Email Sending Using Resend
   try {
+    // Send OTP/verification code to user's email inbox.
     await sendVerificationEmail(email, name, securityCode);
     console.log(`Verification email sent to ${email}`);
   } catch (err) {
@@ -160,6 +165,7 @@ const registerUser = asyncHandler(async (req, res) => {
   console.log("Regsiter Route End");
   return res
     .status(201)
+    // tempToken is required by /verifyemail to identify the pending user.
     .cookie("tempToken", tempToken, tempTokenCookieOptions)
     .json(
       new APIResponse(
@@ -206,14 +212,17 @@ const checkUsernameAvailability = asyncHandler(async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const verifyEmailID = asyncHandler(async (req, res) => {
+  // Read short-lived cookie created during registration.
   const tempToken = req.cookies?.tempToken;
 
   if (!tempToken) {
     throw new APIError(404, "No temp cookie found for verification.");
   }
+  // Decode temp token to resolve which account is being verified.
   const decodeToken = jwt.verify(tempToken, process.env.SECRET);
 
   const email = decodeToken.email;
+  // OTP is expected as securityCode from client payload.
   const { securityCode } = req.body;
 
   const user = await User.findOne({ email });
@@ -231,6 +240,7 @@ const verifyEmailID = asyncHandler(async (req, res) => {
 
   // Check if verify code is correct & not expired
   if (user.securityCode === securityCode) {
+    // Mark account verified and clear one-time verification fields.
     user.isVerified = true;
     user.securityCode = null;
     user.securityCodeExpiry = null;
@@ -240,6 +250,7 @@ const verifyEmailID = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
+      // Clear tempToken after success so OTP flow cannot be replayed.
       .clearCookie("tempToken", cookieOptions)
       .json(new APIResponse(200, {}, "User is successfully verified"));
   }
@@ -252,6 +263,7 @@ const verifyEmailID = asyncHandler(async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const loginUser = asyncHandler(async (req, res) => {
+  // Standard credential login payload.
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -279,6 +291,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
+    // Set auth cookies for session-based API access.
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
     .json(new APIResponse(200, {}, "You are successfully Logged In "));
@@ -304,6 +317,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   // Clear cookies
   res
+    // Remove all auth and temporary registration cookies.
     .clearCookie("accessToken", cookieOptions)
     .clearCookie("refreshToken", cookieOptions)
     .clearCookie("tempToken", cookieOptions)
@@ -334,6 +348,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     }
     // CSRF State verification
     else if (q.state !== req.session.state) {
+      // Reject callback if CSRF state does not match session value.
       // Verify state value
       console.error(
         "State mismatch. Possible CSRF attack. Expected:",
@@ -343,6 +358,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
       );
       throw new APIError(403, "State mismatch. Possible CSRF attack.");
     } else {
+      // Exchange authorization code for Google tokens.
       // Get access and refresh tokens (if access_type is offline)
       let { tokens } = await oauth2Client.getToken(q.code);
       oauth2Client.setCredentials(tokens);
@@ -380,6 +396,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
           $setOnInsert: userData
         }, // The data to insert if the user doesn't exist
         {
+          // Upsert means create the user on first Google login, otherwise update.
           upsert: true, // This creates the document if it doesn't exist
           new: true, // This returns the new document if created, or the existing one if found
           setDefaultsOnInsert: true, // Applies your schema's default values on creation
@@ -407,6 +424,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
 
       return res
     .status(200)
+    // Persist local auth cookies after Google login/upsert.
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
     .redirect(`${process.env.DOMAIN}/chat?message=${encodeURIComponent(messageSuccess)}`);
@@ -502,6 +520,7 @@ const gmailLink = asyncHandler(async (req, res) => {
     }
     // CSRF State verification
     else if (q.state !== req.session.state) {
+      // CSRF protection for Gmail OAuth callback.
       // Verify state value
       console.error(
         "State mismatch. Possible CSRF attack. Expected:",
@@ -511,6 +530,7 @@ const gmailLink = asyncHandler(async (req, res) => {
       );
       throw new APIError(403, "State mismatch. Possible CSRF attack.");
     } else {
+      // Exchange callback code for Gmail OAuth tokens.
       // Get access and refresh tokens (if access_type is offline)
       let { tokens } = await oauth2ClientGmail.getToken(q.code);
       oauth2ClientGmail.setCredentials(tokens);
@@ -556,6 +576,7 @@ const gmailLink = asyncHandler(async (req, res) => {
 
       // --- Clear session data after successful linking ---
       if (req.session) {
+        // Cleanup OAuth temporary session data after success.
         req.session.emailForGoogleLink = undefined;
         req.session.state = undefined; // Clear CSRF state
         // req.session.destroy((err) => {
@@ -572,6 +593,7 @@ const gmailLink = asyncHandler(async (req, res) => {
       console.log("Linking Google Route End");
       return res
         .status(200)
+        // Issue fresh auth cookies and redirect with linked state.
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
         .redirect(`${process.env.DOMAIN}?linked=true`);
@@ -599,6 +621,7 @@ const gmailLink = asyncHandler(async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const sendSecurityCodeLogged = asyncHandler(async (req, res) => {
+  // req.user comes from auth middleware; only logged users can use this route.
   const user = req.user; // middleware incoming
 
   console.log(user);
@@ -635,6 +658,7 @@ const sendSecurityCodeLogged = asyncHandler(async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const sendSecurityCode = asyncHandler(async (req, res) => {
+  // Password-reset security code request payload.
   const email = req.body.email;
 
   if (!email) {
@@ -680,6 +704,7 @@ const sendSecurityCode = asyncHandler(async (req, res) => {
  */
 const passwordReset = asyncHandler(async (req, res) => {
 
+  // Email identifies target account for password reset flow.
   const email = req.body.email;
 
   if (!email) {
@@ -703,11 +728,13 @@ const passwordReset = asyncHandler(async (req, res) => {
 
   // Verify if entered code matches stored code
   if (freshUser.securityCode !== securityCode) {
+    // Prevent reset when provided OTP is wrong.
     throw new APIError(400, "Invalid verification code");
   }
 
   // Updated password
   freshUser.password = password;
+  // Invalidate OTP after successful password update.
   freshUser.securityCode = null; // Removed verification code after use
   freshUser.securityCodeExpiry = null;
 
