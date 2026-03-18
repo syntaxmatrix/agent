@@ -19,7 +19,7 @@ It’s inspired by **Bhindi AI** and built as a team project using a modular **m
 ## 📂 Repository Structure
 
 ```
-bhindi-clone/
+agent/
 ├── frontend/          # Next.js UI
 ├── backend/           # API + agent orchestration
    ├── src/
