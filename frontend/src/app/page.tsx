@@ -1,103 +1,167 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [query, setQuery] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const handleSearch = () => {
+    if (!query.trim()) return;
+    alert("Your question: " + query);
+  };
+
+  return (
+    <main>
+      {/* HERO */}
+      <section
+        style={{
+          padding: "120px 0",
+          textAlign: "center",
+          background:
+            "radial-gradient(circle at top, #035151 0%, #011e20 45%, #a0e1e8 100%)",
+        }}
+      >
+        <div className="container">
+
+          {/* Heading Gradient */}
+          <h1
+            style={{
+              fontSize: "3.5rem",
+              fontWeight: "700",
+              background: `linear-gradient(90deg,
+                #22AC80 0%,
+                #24AC96 35%,
+                #2474BE 70%,
+                #247AC9 100%)`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+             Agentic AI
+          </h1>
+
+          <p
+            style={{
+              color: "#94a3b8",
+              marginTop: "20px",
+              fontSize: "1.2rem",
+            }}
           >
-            Read our docs
-          </a>
+            Ask. Think. Execute. Experience next-gen intelligence.
+          </p>
+
+          {/* Search Bar */}
+          <div
+            style={{
+              marginTop: "50px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                background: "rgb(227, 239, 241)",
+                border: "1px solid rgb(19, 47, 76)",
+                borderRadius: "40px",
+                padding: "6px",
+                width: "65%",
+                boxShadow:
+                  "0 0 25px rgba(34,172,128,0.35), 0 0 40px rgba(36,122,201,0.35)",
+              }}
+            >
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Ask your AI agent anything..."
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "white",
+                  fontSize: "1rem",
+                  paddingLeft: "15px",
+                }}
+              />
+              <button
+                onClick={handleSearch}
+                style={{
+                  background: `linear-gradient(135deg,
+                    #22AC80 0%,
+                    #24AC96 40%,
+                    #2474BE 70%,
+                    #247AC9 100%)`,
+                  border: "none",
+                  borderRadius: "30px",
+                  padding: "10px 22px",
+                  color: "white",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                Ask →
+              </button>
+            </div>
+          </div>
+
+          <p
+            style={{
+              marginTop: "25px",
+              color: "#64748b",
+              fontSize: "14px",
+            }}
+          >
+            Try: "Build me a smart e-commerce workflow"
+          </p>
+
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* FEATURES */}
+      <section style={{
+          padding: "120px 0",
+          textAlign: "center",
+          background:
+            "radial-gradient(circle at top, #035151 0%, #011e20 45%, #a0e1e8 100%)",
+        }}>
+        <div className="container">
+          <h2 style={{ textAlign: "center", fontSize: "2.2rem", color: "white" }}>
+            Why Agentic AI?
+          </h2>
+
+          <div
+            style={{
+              marginTop: "50px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))",
+              gap: "25px",
+            }}
+          >
+            {[
+              "Autonomous Reasoning",
+              "Task Execution",
+              "Tool Integration",
+              "Real-Time Intelligence",
+            ].map((item, i) => (
+              <div
+                key={i}
+                style={{
+                  background: "#0f172a",
+                  padding: "25px",
+                  borderRadius: "12px",
+                  border: "1px solid #1e293b",
+                  color: "white",
+                }}
+              >
+                <h3>{item}</h3>
+                <p style={{ color: "#94a3b8", marginTop: "8px" }}>
+                  Advanced AI designed to handle real-world workflows.
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

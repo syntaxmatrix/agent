@@ -7,10 +7,10 @@ It’s inspired by **Bhindi AI** and built as a team project using a modular **m
 
 ## 🚀 Features
 - 🌐 **Frontend (Next.js)** → Chat-based UI.  
-- ⚙️ **Backend (Node.js / FastAPI)** → Orchestrates agents and APIs.  
-- 🤖 **Agents (LangChain / CrewAI)** → AI workers for tasks like email, GitHub, Slack.  
+- ⚙️ **Backend (Node.js)** → Orchestrates agents and APIs.  
+- 🤖 **Agents** → AI workers for tasks like email, GitHub, Slack.  
 - 🔌 **Integrations** → Secure app connectors (OAuth 2.0).  
-- 🗄️ **Database (PostgreSQL)** → Stores user data, tasks, and logs.  
+- 🗄️ **Database (MongoDB)** → Stores user data, tasks, and logs.  
 - 🐳 **Dockerized** → Local development ready.  
 - ✅ **CI/CD via GitHub Actions** → Auto testing + deployment.  
 
@@ -19,13 +19,14 @@ It’s inspired by **Bhindi AI** and built as a team project using a modular **m
 ## 📂 Repository Structure
 
 ```
-bhindi-clone/
+agent/
 ├── frontend/          # Next.js UI
 ├── backend/           # API + agent orchestration
-├── agents/            # AI agents (Gmail, GitHub, etc.)
-├── integrations/      # App connectors
+   ├── src/
+      ├── agents/            # AI agents (Gmail, GitHub, etc.)
+      ├── integrations/      # App connectors
 ├── docs/              # Documentation
-├── tests/             # Shared tests
+<!-- ├── tests/             # Shared tests -->
 └── .github/           # CI/CD workflows
 ```
 
@@ -33,9 +34,9 @@ bhindi-clone/
 
 ## 🛠️ Tech Stack
 - **Frontend:** Next.js + Tailwind  
-- **Backend:** Node.js (Express) or Python (FastAPI)  
-- **Agents:** LangChain / CrewAI  
-- **Database:** PostgreSQL + pgvector  
+- **Backend:** Node.js (Express)
+- **Agents:** 
+- **Database:** MongoDB  
 - **Infra:** Docker + Docker Compose  
 - **CI/CD:** GitHub Actions  
 
@@ -45,15 +46,14 @@ bhindi-clone/
 
 ### 1. Clone Repo
 ```bash
-git clone https://github.com/<your-org>/bhindi-clone
-cd bhindi-clone
+git clone https://github.com/syntaxmatrix/agent.git
+cd agent
 ```
 
 ### 2. Install Dependencies
-We use **pnpm workspaces**:
+We use **npm workspaces**:
 ```bash
-npm install -g pnpm
-pnpm install
+npm install -
 ```
 
 ### 3. Run with Docker
@@ -62,7 +62,7 @@ docker-compose up --build
 ```
 
 - Frontend → [http://localhost:3000](http://localhost:3000)  
-- Backend → [http://localhost:4000](http://localhost:4000)  
+- Backend → [http://localhost:8000](http://localhost:8000)  
 
 ---
 
@@ -96,20 +96,28 @@ Each service needs its own `.env`. Example:
 
 ```env
 # Common
+PORT = 8000
 OPENAI_API_KEY=sk-xxxx
-DATABASE_URL=postgres://user:password@localhost:5432/bhindi
+MONGODB_URI = "mongodb+srv://<username>:<password>@<cluster-name>.<db_domain>/?retryWrites=true&w=majority&appName=<cluster-name>"
+
 
 # Gmail Integration
 GMAIL_CLIENT_ID=xxxx
 GMAIL_CLIENT_SECRET=xxxx
-GMAIL_REDIRECT_URI=http://localhost:4000/auth/callback
+GMAIL_REDIRECT_URI=http://localhost:8000/auth/callback
+.....
+.....
+.....
+...more..to..be..added.....
+
 ```
 
 ---
 
 ## 📘 Documentation
-- [docs/architecture.md](./docs/architecture.md) → System Design  
-- [docs/contributing.md](./docs/contributing.md) → Contribution Guide  
+- Will be added soon
+<!-- - [docs/architecture.md](./docs/architecture.md) → System Design  
+- [docs/contributing.md](./docs/contributing.md) → Contribution Guide   -->
 
 ---
 

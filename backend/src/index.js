@@ -1,18 +1,21 @@
-import express from "express";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config({
-  path: "../.env",
-});
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-const app = express()
+const { app } = await import("./app.js");
+const { default: connectDB } = await import("./utils/dbConfig.js");
 
-
-app.listen(process.env.PORT, () => {
-  console.log("Server is RUNNING at PORT :", process.env.PORT);
-});
-
-
-app.get("/", (req, res) => {
-  res.send("Backend API running 🚀");
-});
+// Connect to MongoDB and start the server
+connectDB()
+  .then(() => {
+    app.listen(process.env.PORT, () => {
+      console.log("Server is RUNNING at PORT :", process.env.PORT);
+      console.log(` Server Link : http://localhost:${process.env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log("MONGODB CONNECTION FAILED !!!", err);
+  });

@@ -7,7 +7,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config  src/index.js",
-    "start": "node -r dotenv/config src/index.js"
+    "start": "node -r dotenv/config src/index.js",
+    "db:pull": "prisma db pull --env-file ../.env",
+    "db:push": "prisma db push --env-file ../.env",
+    "db:generate": "prisma generate --env-file ../.env"
   },
   "repository": {
     "type": "git",
@@ -16,9 +19,18 @@
   "author": "syntax matrix",
   "license": "MIT",
   "dependencies": {
+    "@google/genai": "^1.20.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "prisma": "^6.15.0"
+    "express-session": "^1.18.2",
+    "googleapis": "^159.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.21.0",
+    "mongoose": "^8.23.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
