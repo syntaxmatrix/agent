@@ -11,7 +11,6 @@ import url from "url";
 import { google } from "googleapis";
 import CryptoJS from "crypto-js";
 
-
 //User Controllers
 
 /**
@@ -129,7 +128,7 @@ const registerUser = asyncHandler(async (req, res) => {
     securityCodeExpiry,
   });
 
-  console.log("Registered User:", user); /// #Remove Must
+  console.log("Registered User:", user); /// #DebugOnly #Remove Must
 
   // Fetch created user without sensitive data
   const createdUser = await User.findById(user._id).select(
@@ -241,6 +240,7 @@ const verifyEmailID = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
+      .clearCookie("tempToken", cookieOptions)
       .json(new APIResponse(200, {}, "User is successfully verified"));
   }
   throw new APIError(400, "Invalid verification code");
@@ -275,7 +275,7 @@ const loginUser = asyncHandler(async (req, res) => {
     user._id
   );
 
-  console.log("Login Route End", "Generated Tokens: ", { accessToken, refreshToken });
+  // console.log("Login Route End", "Generated Tokens: ", { accessToken, refreshToken }); #DebugOnly
 
   return res
     .status(200)
@@ -409,7 +409,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
-    .redirect(`${process.env.DOMAIN}?message=${encodeURIComponent(messageSuccess)}`);
+    .redirect(`${process.env.DOMAIN}/chat?message=${encodeURIComponent(messageSuccess)}`);
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -421,7 +421,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     const statusCode = error instanceof APIError ? error.statusCode : 500;
     return res
       .status(statusCode)
-      .redirect(`${process.env.DOMAIN}?message=${encodeURIComponent(errorMessage)}`);
+      .redirect(`${process.env.DOMAIN}/error?message=${encodeURIComponent(errorMessage)}`);
   }
 });
 
@@ -532,16 +532,7 @@ const gmailLink = asyncHandler(async (req, res) => {
           "Google Access Token Not Found in Google Response"
         );
       }
-      // // Check for required scopes
-      // if (
-      //   !tokens.scope.includes("https://www.googleapis.com/auth/youtube.upload")
-      // ) {
-      //   throw new APIError(
-      //     404,
-      //     "Failed: Required scope YouTube Upload is missing!"
-      //   );
-      // }
-
+    
       const user = await User.findOne({ email }); // Find user using email from session
 
       if (!user) {
