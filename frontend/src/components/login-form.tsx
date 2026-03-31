@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -8,13 +10,49 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoginSchema, LoginInput } from "@/schemas/auth";
+import axios, { AxiosError } from "axios";
+import { toast } from "sonner"
+import { useRouter } from "next/navigation";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const [isSubmiting,setIsSubmitting] = useState(false);
+  const router = useRouter();
+  //zod
+  const form = useForm<LoginInput>({
+    resolver:zodResolver(LoginSchema),
+    defaultValues :{
+      email:"",
+      password:"",
+    }
+  });
+  const onSubmit = async(data:LoginInput) => {
+    setIsSubmitting(true);
+    try {
+      const response = await axios.post("/api/user/login",data); ///api/v1/user/login
+      toast.success("You are Successfully Logged In",{
+        description: response.data.message
+      })
+      router.replace("/chats");
+      setIsSubmitting(false)
+    } catch (error) {
+      console.error("Error In Login",error)
+      const axiosError = error as AxiosError;
+      const errorMessage = (axiosError.response?.data as {message : string})?.message ?? "Logging Failed";
+      toast.error("Logging In Failed",{
+        description: errorMessage,
+      });
+      setIsSubmitting(false);
+    }
+  }
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form className={cn("flex flex-col gap-6", className)} onSubmit={form.handleSubmit(onSubmit)} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Login to your account</h1>
@@ -24,7 +62,7 @@ export function LoginForm({
         </div>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input id="email" type="email" placeholder="m@example.com" required {...form.register("email")} />
         </Field>
         <Field>
           <div className="flex items-center">
@@ -36,10 +74,12 @@ export function LoginForm({
               Forgot your password?
             </a>
           </div>
-          <Input id="password" type="password" required />
+          <Input id="password" type="password" required {...form.register("password")} />
         </Field>
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit" disabled={isSubmiting}>
+            {isSubmiting ? "Logging in..." : "Login"} 
+          </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>

@@ -1,5 +1,5 @@
 import "./globals.css";
-import Navbar from "./Navbar";
+import Navbar from "./components/Navbar";
 
 export const metadata = {
   title: "Agentic AI",
@@ -14,8 +14,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Navbar />
         {children}
+        <Toaster richColors />
       </body>
     </html>
   );

@@ -10,19 +10,101 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp"
 import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { RegisterSchema, RegisterInput, VerifyCodeSchema } from "@/schemas/auth";
+import axios from "@/lib/axios";
+import { AxiosError } from "axios";
+import { toast } from "sonner"
+import { useRouter } from "next/navigation";
 
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const router = useRouter();
 
-  function handleContinue(e: React.FormEvent) {
-    e.preventDefault();
+  const form = useForm<RegisterInput>({
+    resolver: zodResolver(RegisterSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const handleContinue = async () => {
+    const isEmailValid = await form.trigger("email");
+    if (!isEmailValid) return;
     setStep(2);
-  }
+  };
+
+  const handleRegister = async (data: RegisterInput) => {
+    setIsSubmitting(true);
+    try {
+      const response = await axios.post("/api/user/register", {
+        email: data.email,
+        password: data.password,
+      });
+      toast.success("Verification Email Sent", {
+        description: response.data.message,
+      });
+      setStep(3);
+    } catch (error) {
+      console.error("Error In Register", error);
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        (axiosError.response?.data as { message: string })?.message ??
+        "Registration Failed";
+      toast.error("Registration Failed", {
+        description: errorMessage,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    const parsed = VerifyCodeSchema.safeParse({ verifyCode: otpCode });
+    if (!parsed.success || otpCode.length !== 6) {
+      toast.error("Invalid OTP", {
+        description: "Please enter the 6-digit verification code.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await axios.post("/api/user/verifyemail", {
+        securityCode: otpCode,
+      });
+      toast.success("Email Verified", {
+        description: response.data.message,
+      });
+      router.replace("/login");
+    } catch (error) {
+      console.error("Error In Email Verification", error);
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        (axiosError.response?.data as { message: string })?.message ??
+        "OTP verification failed";
+      toast.error("Verification Failed", {
+        description: errorMessage,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props}>
@@ -45,7 +127,12 @@ export function RegisterForm({
 
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input id="email" type="email" placeholder="m@example.com" required />
+              <Input id="email" type="email" placeholder="m@example.com" required {...form.register("email")} />
+              {form.formState.errors.email?.message && (
+                <FieldDescription className="text-red-500">
+                  {form.formState.errors.email.message}
+                </FieldDescription>
+              )}
             </Field>
 
             <Field>
@@ -60,18 +147,53 @@ export function RegisterForm({
           <>
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input id="password" type="password" required />
+              <Input id="password" type="password" required {...form.register("password")} />
+              {form.formState.errors.password?.message && (
+                <FieldDescription className="text-red-500">
+                  {form.formState.errors.password.message}
+                </FieldDescription>
+              )}
             </Field>
 
             <Field>
               <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
-              <Input id="confirmPassword" type="password" required />
+              <Input id="confirmPassword" type="password" required {...form.register("confirmPassword")} />
+              {form.formState.errors.confirmPassword?.message && (
+                <FieldDescription className="text-red-500">
+                  {form.formState.errors.confirmPassword.message}
+                </FieldDescription>
+              )}
             </Field>
 
             <Field>
-              <Button type="submit">Register</Button>
+              <Button type="button" disabled={isSubmitting} onClick={form.handleSubmit(handleRegister)}>
+                {isSubmitting ? "Registering..." : "Register"}
+              </Button>
             </Field>
           </>
+        )}
+
+        {step === 3 && (
+<>
+<InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
+  <InputOTPGroup>
+    <InputOTPSlot index={0} />
+    <InputOTPSlot index={1} />
+    <InputOTPSlot index={2} />
+  </InputOTPGroup>
+  <InputOTPSeparator />
+  <InputOTPGroup>
+    <InputOTPSlot index={3} />
+    <InputOTPSlot index={4} />
+    <InputOTPSlot index={5} />
+  </InputOTPGroup>
+</InputOTP>
+<Field>
+  <Button type="button" disabled={isSubmitting || otpCode.length !== 6} onClick={handleVerifyEmail}>
+    {isSubmitting ? "Verifying..." : "Verify OTP"}
+  </Button>
+</Field>
+</>
         )}
 
         <FieldDescription className="text-center">
