@@ -10,7 +10,7 @@ export default function Navbar() {
         padding: "14px 0",
         backdropFilter: "blur(12px)",
         background: "rgba(8,15,30,0.7)",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.68)"
+        borderBottom: "1px solid rgba(255,255, 255, 0.68)"
       }}
     >
       <div
