@@ -10,7 +10,7 @@ export default function Navbar() {
         padding: "14px 0",
         backdropFilter: "blur(12px)",
         background: "rgba(8,15,30,0.7)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)"
+        borderBottom: "1px solid rgba(255, 255, 255, 0.68)"
       }}
     >
       <div
@@ -18,7 +18,7 @@ export default function Navbar() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "0 40px", // ✅ FIX
+          padding: "0 40px", 
           maxWidth: "1200px",
           margin: "0 auto"
         }}
