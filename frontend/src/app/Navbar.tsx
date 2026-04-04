@@ -4,70 +4,78 @@ export default function Navbar() {
   return (
     <nav
       style={{
-        position: "sticky",
+        position: "fixed",
         top: 0,
-        zIndex: 50,
-        padding: "14px 0",
+        width: "100%",
+        zIndex: 1000,
+        background: "rgba(15, 23, 42, 0.7)",
         backdropFilter: "blur(12px)",
-        background: "rgba(8,15,30,0.7)",
-        borderBottom: "1px solid rgba(255,255, 255, 0.68)"
+        borderBottom: "1px solid rgba(255,255,255,0.05)",
       }}
     >
       <div
         style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: "12px 20px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "0 40px", 
-          maxWidth: "1200px",
-          margin: "0 auto"
         }}
       >
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {/* LEFT SIDE (LOGO) */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div
             style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "10px",
+              width: "38px",
+              height: "38px",
+              borderRadius: "12px",
               background: "linear-gradient(135deg,#22c55e,#2563eb)",
-              boxShadow: "0 0 20px rgba(34,197,94,0.6)"
             }}
           />
           <h2
             style={{
-              fontWeight: "800",
-              background: "linear-gradient(90deg,#22c55e,#60a5fa)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent"
+              fontSize: "18px",
+              fontWeight: "700",
+              color: "#22c55e",
+              letterSpacing: "1px",
             }}
           >
             AGENTIC AI
           </h2>
         </div>
 
-        {/* Buttons */}
-        <div style={{ display: "flex", gap: "12px" }}>
+        {/* RIGHT SIDE (BUTTONS) */}
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           <button
             style={{
-              background: "transparent",
-              color: "#cbd5e1",
               padding: "8px 18px",
-              borderRadius: "20px",
-              border: "1px solid #334155"
+              borderRadius: "25px",
+              border: "1px solid #334155",
+              background: "transparent",
+              color: "#cbd5f5",
+              cursor: "pointer",
+              transition: "0.3s",
             }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "#1e293b")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "transparent")
+            }
           >
             Login
           </button>
 
           <button
             style={{
+              padding: "8px 18px",
+              borderRadius: "25px",
+              border: "none",
               background: "linear-gradient(135deg,#22c55e,#2563eb)",
               color: "white",
-              padding: "8px 18px",
-              borderRadius: "20px",
-              border: "none",
-              boxShadow: "0 0 18px rgba(37,99,235,0.6)"
+              fontWeight: "600",
+              cursor: "pointer",
             }}
           >
             Sign Up
