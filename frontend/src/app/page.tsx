@@ -1,19 +1,43 @@
 "use client";
-import React, { useState } from "react";
-import { Search, ArrowRight, Sparkles, Wand2, Mail, BarChart3, Bot, Fingerprint, Cpu, Zap } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, ArrowRight, Sparkles, Wand2, Mail, BarChart3, Bot, Fingerprint, Cpu, Zap, Loader2 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "./Navbar";
+import axios from "@/lib/axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // For mobile
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!query.trim()) return;
-    setHistory((prev) => [query, ...prev]);
+    
+    // Optimistically update history
+    const currentQuery = query;
+    setHistory((prev) => [currentQuery, ...prev]);
     setQuery("");
+
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`/api/agent/ask?q=${encodeURIComponent(currentQuery)}`);
+      // Optionally handle the agent's response here (e.g., toast or a chat interface if added later)
+      toast.success("Intelligence analyzed.", { description: "The agent has processed your query." });
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        toast.error("Please sign in to continue.", { description: "Your session has expired or you are not logged in." });
+        router.push("/signin");
+      } else {
+        toast.error("Agent communication failed.", { description: error.response?.data?.message || "Something went wrong." });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const suggestions = [
@@ -93,10 +117,17 @@ export default function Home() {
                 />
                 <button
                   onClick={handleSearch}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-5 h-[44px] flex items-center justify-center gap-2 font-semibold transition-all duration-300 active:scale-95 shadow-lg shadow-indigo-500/10"
+                  disabled={isLoading}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-5 h-[44px] flex items-center justify-center gap-2 font-semibold transition-all duration-300 active:scale-95 shadow-lg shadow-indigo-500/10 disabled:opacity-50"
                 >
-                  <span className="hidden sm:inline text-xs">Send</span>
-                  <ArrowRight size={14} />
+                  {isLoading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline text-xs">Send</span>
+                      <ArrowRight size={14} />
+                    </>
+                  )}
                 </button>
               </div>
             </div>
