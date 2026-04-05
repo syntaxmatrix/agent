@@ -1,103 +1,44 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
+import { Zap } from "lucide-react";
 
 export default function Navbar() {
   const [active, setActive] = useState<"login" | "signup" | null>(null);
 
   return (
-    <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        width: "100%",
-        zIndex: 1000,
-        background: "#020617",
-        borderBottom: "1px solid #1e293b",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "12px 20px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+    <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-indigo-50/50 shadow-sm transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
         {/* LOGO */}
-        <h2
-          style={{
-            fontSize: "18px",
-            fontWeight: "600",
-            color: "#e2e8f0",
-          }}
-        >
-          Agentic AI
-        </h2>
+        <div className="flex items-center gap-8">
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold text-indigo-600 tracking-tight">
+            <Zap className="fill-indigo-600 text-indigo-600" size={20} />
+            Agentic AI
+          </Link>
+
+          {/* NAV ITEMS */}
+          <div className="hidden md:flex gap-6 items-center text-sm font-medium text-slate-600">
+            <Link href="#" className="hover:text-indigo-600 transition-colors">About</Link>
+            <Link href="#" className="hover:text-indigo-600 transition-colors">Services</Link>
+            <Link href="#" className="hover:text-indigo-600 transition-colors">Contact</Link>
+          </div>
+        </div>
 
         {/* BUTTONS */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          
-          {/* LOGIN */}
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setActive("login")}
-            style={{
-              padding: "6px 16px",
-              borderRadius: "8px",
-              border:
-                active === "login"
-                  ? "1px solid #6366f1"
-                  : "1px solid #1e293b",
-              background:
-                active === "login"
-                  ? "rgba(99,102,241,0.1)"
-                  : "transparent",
-              color: "#cbd5f5",
-              fontSize: "14px",
-              fontWeight: "500",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              if (active !== "login") {
-                e.currentTarget.style.background = "#0f172a";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (active !== "login") {
-                e.currentTarget.style.background = "transparent";
-              }
-            }}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              active === "login" 
+                ? "text-indigo-700 bg-indigo-50 border-indigo-200" 
+                : "text-slate-600 hover:text-indigo-600 hover:bg-slate-50 border-transparent shadow-sm"
+            } border`}
           >
             Login
           </button>
-
-          {/* SIGNUP */}
           <button
             onClick={() => setActive("signup")}
-            style={{
-              padding: "6px 16px",
-              borderRadius: "8px",
-              border: "1px solid #1e293b",
-              background:
-                active === "signup" ? "#6366f1" : "#0f172a",
-              color: "#e2e8f0",
-              fontSize: "14px",
-              fontWeight: "500",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              if (active !== "signup") {
-                e.currentTarget.style.background = "#1e293b";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (active !== "signup") {
-                e.currentTarget.style.background = "#0f172a";
-              }
-            }}
+            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
             Sign Up
           </button>

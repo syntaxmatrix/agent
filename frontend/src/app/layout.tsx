@@ -1,7 +1,9 @@
 import "./globals.css";
-import Navbar from "./Navbar"; // ✅ FIXED
+import Navbar from "./Navbar";
 import { Toaster } from "@/components/ui/sonner";
-import Sidebar from "@/components/Sidebar";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Agentic AI",
@@ -15,11 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-     <body>
-  <Navbar />
-  {children}   {/* ✅ NO marginTop */}
-  <Toaster richColors />
-</body>
+      <body className={`${inter.className} antialiased text-slate-900 bg-slate-50 min-h-screen flex flex-col`}>
+        <Navbar />
+        {children}
+        <Toaster richColors />
+      </body>
     </html>
   );
 }
