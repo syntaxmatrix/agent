@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import { Resend } from "resend";
 import {
   generateVerificationEmailHTML,
@@ -9,7 +8,13 @@ import { APIError } from "../../utils/APIError.js";
 
 const RESENDKEY = process.env.RESEND_API_KEY;
 
-// Load API key securely from environment variables
+if (!RESENDKEY) {
+  throw new Error(
+    "RESEND_API_KEY is not set. Please set RESEND_API_KEY in your .env"
+  );
+}
+
+// Initialize Resend client with the API key
 const resend = new Resend(RESENDKEY);
 
 // Function to send a verification email
@@ -18,19 +23,16 @@ const sendVerificationEmail = async (email, name, verifyCode) => {
   const emailHTML = generateVerificationEmailHTML(name, verifyCode);
 
   try {
-    const { data, error } = await resend.emails.send({
+    const result = await resend.emails.send({
       from: "Agent <noreply.agent@retube.live>",
       to: [email],
       subject: "Agent | Verification Code",
       html: emailHTML,
     });
 
-    if (error) {
-      throw new APIError(500, error.message);
-    }
-
-    return { message: "OTP sent successfully", email };
+    return { message: "OTP sent successfully", email, result };
   } catch (err) {
+    console.error("Resend send error:", err);
     throw new APIError(500, `Failed to send email: ${err.message}`);
   }
 };
