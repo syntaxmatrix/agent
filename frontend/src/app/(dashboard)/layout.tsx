@@ -33,8 +33,6 @@ export default function DashboardLayout({
         )}
       >
         <Header 
-          isOpen={isSidebarOpen} 
-          toggle={toggleSidebar} 
           isLoggedIn={isLoggedIn}
           onLogin={() => setIsLoggedIn(true)}
         />

@@ -1,29 +1,20 @@
 "use client"
 
 import React from "react"
-import { PanelLeft, Sparkles } from "lucide-react"
+import { Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 interface HeaderProps {
-  isOpen: boolean
-  toggle: () => void
   isLoggedIn: boolean
   onLogin: () => void
 }
 
-export default function Header({ isOpen, toggle, isLoggedIn, onLogin }: HeaderProps) {
+export default function Header({ isLoggedIn, onLogin }: HeaderProps) {
   return (
     <header className="h-20 flex items-center justify-between px-8 bg-transparent relative z-30">
       {/* Left Section */}
       <div className="flex items-center gap-5">
-        <button 
-          onClick={toggle}
-          className="p-2.5 rounded-xl hover:bg-sidebar-accent/80 transition-all text-sidebar-foreground/70 active:scale-95"
-          aria-label="Toggle Sidebar"
-        >
-          <PanelLeft size={20} />
-        </button>
         <div className="flex items-center gap-2.5">
           <span className="font-display font-bold text-slate-800 tracking-tight text-lg">Assistant v2.6</span>
           <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-slate-200/50">PRO</span>
