@@ -1,12 +1,9 @@
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Agentic AI",
-  description: "Autonomous AI Agent System",
+  title: "Agentic AI - Assistant v2.6",
+  description: "Modern SaaS AI assistant for achieving great things.",
 };
 
 export default function RootLayout({
@@ -16,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased text-slate-900 bg-white min-h-screen flex flex-col`}>
+      <body className="antialiased min-h-screen">
         {children}
         <Toaster richColors />
       </body>
