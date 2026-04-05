@@ -1,6 +1,9 @@
 "use client";
+import { useState } from "react";
 
 export default function Navbar() {
+  const [active, setActive] = useState<"login" | "signup" | null>(null);
+
   return (
     <nav
       style={{
@@ -8,9 +11,8 @@ export default function Navbar() {
         top: 0,
         width: "100%",
         zIndex: 1000,
-        background: "rgba(15, 23, 42, 0.7)",
-        backdropFilter: "blur(12px)",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        background: "#020617",
+        borderBottom: "1px solid #1e293b",
       }}
     >
       <div
@@ -23,59 +25,78 @@ export default function Navbar() {
           alignItems: "center",
         }}
       >
-        {/* LEFT SIDE (LOGO) */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "38px",
-              height: "38px",
-              borderRadius: "12px",
-              background: "linear-gradient(135deg,#22c55e,#2563eb)",
-            }}
-          />
-          <h2
-            style={{
-              fontSize: "18px",
-              fontWeight: "700",
-              color: "#22c55e",
-              letterSpacing: "1px",
-            }}
-          >
-            AGENTIC AI
-          </h2>
-        </div>
+        {/* LOGO */}
+        <h2
+          style={{
+            fontSize: "18px",
+            fontWeight: "600",
+            color: "#e2e8f0",
+          }}
+        >
+          Agentic AI
+        </h2>
 
-        {/* RIGHT SIDE (BUTTONS) */}
-        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        {/* BUTTONS */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          
+          {/* LOGIN */}
           <button
+            onClick={() => setActive("login")}
             style={{
-              padding: "8px 18px",
-              borderRadius: "25px",
-              border: "1px solid #334155",
-              background: "transparent",
+              padding: "6px 16px",
+              borderRadius: "8px",
+              border:
+                active === "login"
+                  ? "1px solid #6366f1"
+                  : "1px solid #1e293b",
+              background:
+                active === "login"
+                  ? "rgba(99,102,241,0.1)"
+                  : "transparent",
               color: "#cbd5f5",
+              fontSize: "14px",
+              fontWeight: "500",
               cursor: "pointer",
-              transition: "0.3s",
+              transition: "all 0.2s ease",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "#1e293b")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "transparent")
-            }
+            onMouseEnter={(e) => {
+              if (active !== "login") {
+                e.currentTarget.style.background = "#0f172a";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (active !== "login") {
+                e.currentTarget.style.background = "transparent";
+              }
+            }}
           >
             Login
           </button>
 
+          {/* SIGNUP */}
           <button
+            onClick={() => setActive("signup")}
             style={{
-              padding: "8px 18px",
-              borderRadius: "25px",
-              border: "none",
-              background: "linear-gradient(135deg,#22c55e,#2563eb)",
-              color: "white",
-              fontWeight: "600",
+              padding: "6px 16px",
+              borderRadius: "8px",
+              border: "1px solid #1e293b",
+              background:
+                active === "signup" ? "#6366f1" : "#0f172a",
+              color: "#e2e8f0",
+              fontSize: "14px",
+              fontWeight: "500",
               cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              if (active !== "signup") {
+                e.currentTarget.style.background = "#1e293b";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (active !== "signup") {
+                e.currentTarget.style.background = "#0f172a";
+              }
             }}
           >
             Sign Up

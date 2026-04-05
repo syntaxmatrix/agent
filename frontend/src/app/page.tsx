@@ -9,162 +9,188 @@ export default function Home() {
   const handleSearch = () => {
     if (!query.trim()) return;
 
-    setHistory((prev) => [query, ...prev]); // ✅ store history
+    setHistory((prev) => [query, ...prev]);
     alert("Your question: " + query);
     setQuery("");
   };
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", background: "#020617" }}>
       
-      {/* ✅ SIDEBAR */}
+      {/* SIDEBAR */}
       <Sidebar history={history} />
 
-      {/* ✅ MAIN CONTENT */}
+      {/* MAIN */}
       <main
         style={{
-          marginLeft: "260px", // sidebar space
+          marginLeft: "260px",
           width: "100%",
+          color: "#e2e8f0",
         }}
       >
         {/* HERO */}
         <section
           style={{
-            padding: "100px 0",
-            paddingTop: "120px", // adjust for navbar
+            padding: "120px 20px 80px",
             textAlign: "center",
-            background:
-              "radial-gradient(circle at top, #000000, #184d48)",
+            background: "#020617",
           }}
         >
-          <div className="container">
-            <h1
-              style={{
-                fontSize: "3.5rem",
-                fontWeight: "700",
-                background: "linear-gradient(90deg,#22c55e,#2563eb)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Your Autonomous AI Agent
-            </h1>
+         <h1
+  style={{
+    fontSize: "3rem",
+    fontWeight: "700",
+    letterSpacing: "-1px",
+    background: "linear-gradient(90deg, #34d399, #3b82f6)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  }}
+>
+  Your Autonomous AI Agent
+</h1>
 
-            <p
-              style={{
-                color: "#94a3b8",
-                marginTop: "20px",
-                fontSize: "1.2rem",
-              }}
-            >
-              Ask. Think. Execute. Experience next-gen intelligence.
-            </p>
+          <p
+            style={{
+              color: "#94a3b8",
+              marginTop: "16px",
+              fontSize: "1.1rem",
+            }}
+          >
+            Ask. Think. Execute. Experience next-gen intelligence.
+          </p>
 
-            {/* SEARCH */}
+          {/* SEARCH */}
+          <div
+            style={{
+              marginTop: "40px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <div
               style={{
-                marginTop: "50px",
                 display: "flex",
-                justifyContent: "center",
+                alignItems: "center",
+                background: "#0f172a",
+                border: "1px solid #1e293b",
+                borderRadius: "999px",
+                padding: "6px",
+                width: "60%",
+                maxWidth: "700px",
               }}
             >
-              <div
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Ask your AI agent anything..."
                 style={{
-                  display: "flex",
-                  background: "#020617",
-                  border: "1px solid #1e293b",
-                  borderRadius: "40px",
-                  padding: "6px",
-                  width: "65%",
-                  boxShadow: "0 0 30px rgba(37,99,235,0.2)",
+                  flex: 1,
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "#e2e8f0",
+                  fontSize: "1rem",
+                  paddingLeft: "15px",
+                }}
+              />
+
+              <button
+                onClick={handleSearch}
+                style={{
+                  background: "#6366f1",
+                  border: "none",
+                  borderRadius: "999px",
+                  padding: "10px 22px",
+                  color: "white",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  boxShadow: "0 0 20px rgba(99,102,241,0.4)",
                 }}
               >
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Ask your AI agent anything..."
-                  style={{
-                    flex: 1,
-                    background: "transparent",
-                    border: "none",
-                    outline: "none",
-                    color: "white",
-                    fontSize: "1rem",
-                    paddingLeft: "15px",
-                  }}
-                />
-                <button
-                  onClick={handleSearch}
-                  style={{
-                    background:
-                      "linear-gradient(135deg,#22c55e,#2563eb)",
-                    border: "none",
-                    borderRadius: "30px",
-                    padding: "10px 22px",
-                    color: "white",
-                    fontWeight: "600",
-                  }}
-                >
-                  Ask →
-                </button>
-              </div>
+                Ask →
+              </button>
             </div>
-
-            <p
-              style={{
-                marginTop: "25px",
-                color: "#64748b",
-                fontSize: "14px",
-              }}
-            >
-              Try: "Build me a smart e-commerce workflow"
-            </p>
           </div>
+
+          <p
+            style={{
+              marginTop: "20px",
+              color: "#64748b",
+              fontSize: "14px",
+            }}
+          >
+            Try: "Build me a smart e-commerce workflow"
+          </p>
         </section>
 
         {/* FEATURES */}
         <section
           style={{
-            padding: "80px 0",
+            padding: "80px 20px",
             background: "#020617",
           }}
         >
-          <div className="container">
-            <h2 style={{ textAlign: "center", fontSize: "2.2rem" }}>
-              Why Agentic AI?
-            </h2>
+          <h2
+            style={{
+              textAlign: "center",
+              fontSize: "2rem",
+              fontWeight: "600",
+            }}
+          >
+            Why Agentic AI?
+          </h2>
 
-            <div
-              style={{
-                marginTop: "50px",
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit,minmax(250px,1fr))",
-                gap: "25px",
-              }}
-            >
-              {[
-                "Autonomous Reasoning",
-                "Task Execution",
-                "Tool Integration",
-                "Real-Time Intelligence",
-              ].map((item, i) => (
-                <div
-                  key={i}
+          <div
+            style={{
+              marginTop: "50px",
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit,minmax(250px,1fr))",
+              gap: "25px",
+              maxWidth: "1100px",
+              marginInline: "auto",
+            }}
+          >
+            {[
+              "Autonomous Reasoning",
+              "Task Execution",
+              "Tool Integration",
+              "Real-Time Intelligence",
+            ].map((item, i) => (
+              <div
+                key={i}
+                style={{
+                  background: "#0f172a",
+                  padding: "25px",
+                  borderRadius: "16px",
+                  border: "1px solid #1e293b",
+                  transition: "0.3s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.border =
+                    "1px solid #6366f1";
+                  e.currentTarget.style.transform =
+                    "translateY(-5px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.border =
+                    "1px solid #1e293b";
+                  e.currentTarget.style.transform =
+                    "translateY(0px)";
+                }}
+              >
+                <h3 style={{ fontSize: "1.2rem" }}>{item}</h3>
+                <p
                   style={{
-                    background: "#0f172a",
-                    padding: "25px",
-                    borderRadius: "12px",
-                    border: "1px solid #1e293b",
+                    color: "#94a3b8",
+                    marginTop: "8px",
+                    fontSize: "0.95rem",
                   }}
                 >
-                  <h3>{item}</h3>
-                  <p style={{ color: "#94a3b8", marginTop: "8px" }}>
-                    Advanced AI designed to handle real-world workflows.
-                  </p>
-                </div>
-              ))}
-            </div>
+                  Advanced AI designed to handle real-world workflows.
+                </p>
+              </div>
+            ))}
           </div>
         </section>
       </main>
