@@ -23,21 +23,21 @@ export default function Sidebar({ history, isCollapsed, setIsCollapsed, isOpen }
 
   return (
     <aside 
-      className={`fixed left-0 top-0 h-screen bg-slate-950 text-slate-300 flex flex-col transition-all duration-300 ease-in-out z-[100] ${
+      className={`fixed left-0 top-0 h-screen bg-slate-950 text-slate-300 flex flex-col border-r border-slate-800/50 transition-all duration-300 ease-in-out z-[100] ${
         isCollapsed ? "w-[72px]" : "w-[280px]"
       } ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
     >
       {/* Header */}
       <div className="p-4 flex items-center justify-between h-16 border-b border-slate-800/50">
         {!isCollapsed && (
-          <Link href="/" className="flex items-center gap-2 text-white font-extrabold tracking-tight truncate">
-            <Zap className="fill-indigo-500 text-indigo-500" size={20} />
-            <span>Agentic AI</span>
+          <Link href="/" className="flex items-center gap-2 text-white font-bold tracking-tight truncate">
+            <Zap className="fill-indigo-500 text-indigo-500" size={17} />
+            <span className="text-sm">Agentic AI</span>
           </Link>
         )}
         {isCollapsed && (
           <div className="flex justify-center w-full">
-            <Zap className="fill-indigo-500 text-indigo-500" size={24} />
+            <Zap className="fill-indigo-500 text-indigo-500" size={20} />
           </div>
         )}
         <button 
@@ -52,18 +52,18 @@ export default function Sidebar({ history, isCollapsed, setIsCollapsed, isOpen }
       <div className="p-4">
         <button 
           title={isCollapsed ? "New Chat" : ""}
-          className={`flex items-center gap-3 w-full bg-slate-800 hover:bg-indigo-600 hover:text-white transition-all duration-300 rounded-xl font-bold p-3.5 overflow-hidden group/newchat shadow-md active:scale-95 ${isCollapsed ? "justify-center" : ""}`}
+          className={`flex items-center gap-3 w-full bg-indigo-600 hover:bg-indigo-500 text-white transition-all duration-300 rounded-xl font-semibold p-3 overflow-hidden shadow-sm active:scale-95 ${isCollapsed ? "justify-center" : ""}`}
         >
-          <Plus size={20} className="flex-shrink-0 group-hover/newchat:rotate-90 transition-transform duration-300" />
-          {!isCollapsed && <span className="whitespace-nowrap transition-opacity text-sm">New Chat</span>}
+          <Plus size={18} className="flex-shrink-0" />
+          {!isCollapsed && <span className="whitespace-nowrap text-[13px]">New Chat</span>}
         </button>
       </div>
 
       {/* History section */}
       <div className="flex-1 overflow-y-auto px-3 py-4 custom-scrollbar-visible">
         {!isCollapsed && (
-          <p className="px-3 text-[10px] font-extrabold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
-            <History size={12} /> Recent History
+          <p className="px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 mb-4 flex items-center gap-2 opacity-80">
+            <History size={11} /> Recent Sessions
           </p>
         )}
         

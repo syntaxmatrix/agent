@@ -14,7 +14,7 @@ export default function Navbar({ onToggle, isCollapsed, isSidebarOpen, onMobileT
   const [active, setActive] = useState<"login" | "signup" | null>(null);
 
   return (
-    <nav className="fixed top-0 right-0 left-0 z-[80] bg-white/40 backdrop-blur-2xl border-b border-slate-200/50 transition-all duration-300">
+    <nav className="fixed top-0 right-0 left-0 z-[80] bg-slate-950 border-b border-slate-800/50 transition-all duration-300">
       <div className="w-full mx-auto px-4 sm:px-6 flex justify-between items-center h-16">
         {/* Left Side: Toggle + Logo */}
         <div className="flex items-center gap-3">
@@ -26,35 +26,34 @@ export default function Navbar({ onToggle, isCollapsed, isSidebarOpen, onMobileT
                 onToggle();
               }
             }}
-            className="p-2 hover:bg-slate-100 rounded-xl text-slate-600 transition-colors"
+            className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 transition-colors"
             aria-label="Toggle Sidebar"
           >
             {isSidebarOpen || !isCollapsed ? <X size={20} /> : <Menu size={20} />}
           </button>
           
-          <Link href="/" className="flex items-center gap-2 text-xl font-black text-slate-900 tracking-tight">
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-              <Zap className="fill-white text-white" size={16} />
+          <Link href="/" className="flex items-center gap-2 text-lg font-bold text-white tracking-tight">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-sm">
+              <Zap className="fill-white text-white" size={14} />
             </div>
             <span className="hidden sm:inline-block">Agentic AI</span>
           </Link>
         </div>
 
         {/* Right Side: Auth Buttons */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          <button
-            onClick={() => setActive("login")}
-            className="px-4 py-2 text-sm font-bold text-slate-600 hover:text-indigo-600 transition-all duration-200"
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href="/signin"
+            className="px-4 py-2 text-[13px] font-semibold text-slate-400 hover:text-white transition-all duration-200"
           >
             Login
-          </button>
-          <button
-            onClick={() => setActive("signup")}
-            className="group relative px-6 py-2.5 text-sm font-bold text-white overflow-hidden rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-95"
+          </Link>
+          <Link
+            href="/signup"
+            className="relative px-5 py-2 text-[13px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-full transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md shadow-indigo-500/10"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-[length:200%_auto] animate-gradient-x"></div>
-            <span className="relative z-10">Sign Up</span>
-          </button>
+            Sign Up
+          </Link>
         </div>
       </div>
     </nav>
