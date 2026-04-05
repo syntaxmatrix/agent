@@ -1,16 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { Zap, Menu, X } from "lucide-react";
+import { Zap } from "lucide-react";
 import Link from "next/link";
 
 interface NavbarProps {
-  onToggle: () => void;
-  isCollapsed: boolean;
-  isSidebarOpen: boolean;
-  onMobileToggle: () => void;
 }
 
-export default function Navbar({ onToggle, isCollapsed, isSidebarOpen, onMobileToggle }: NavbarProps) {
+export default function Navbar({ }: NavbarProps) {
   const [active, setActive] = useState<"login" | "signup" | null>(null);
 
   return (
@@ -18,20 +14,6 @@ export default function Navbar({ onToggle, isCollapsed, isSidebarOpen, onMobileT
       <div className="w-full mx-auto px-4 sm:px-6 flex justify-between items-center h-16">
         {/* Left Side: Toggle + Logo */}
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => {
-              if (window.innerWidth < 768) {
-                onMobileToggle();
-              } else {
-                onToggle();
-              }
-            }}
-            className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 transition-colors"
-            aria-label="Toggle Sidebar"
-          >
-            {isSidebarOpen || !isCollapsed ? <X size={20} /> : <Menu size={20} />}
-          </button>
-          
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-white tracking-tight">
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-sm">
               <Zap className="fill-white text-white" size={14} />
