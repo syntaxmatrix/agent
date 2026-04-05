@@ -112,6 +112,45 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+@layer utilities {
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 15s ease infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+
+  .animate-delay-1000 {
+    animation-delay: 1000ms;
+  }
+
+  @keyframes gradient-x {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .custom-scrollbar-visible::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar-visible::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar-visible::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.2); 
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
+  .custom-scrollbar-visible::-webkit-scrollbar-thumb:hover {
+    background: rgba(79, 70, 229, 0.3);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

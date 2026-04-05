@@ -1,77 +1,125 @@
 "use client";
-import React from "react";
-import { Bookmark, Clock, Bell } from "lucide-react";
+import React, { useState } from "react";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  MessageSquare, 
+  Zap,
+  History,
+  MoreHorizontal,
+  LayoutGrid
+} from "lucide-react";
+import Link from "next/link";
 
-export default function Sidebar({ history }: { history: string[] }) {
+interface SidebarProps {
+  history: string[];
+  isCollapsed: boolean;
+  setIsCollapsed: (v: boolean) => void;
+  isOpen?: boolean;
+}
+
+export default function Sidebar({ history, isCollapsed, setIsCollapsed, isOpen }: SidebarProps) {
+
   return (
-    <aside className="hidden lg:block w-80 min-h-[calc(100vh-4rem)] border-l border-indigo-50 bg-white/50 backdrop-blur-md p-6">
-      <div className="space-y-8 sticky top-24">
-        {/* Saved Items */}
-        <section>
-          <h3 className="text-xs tracking-wider text-slate-400 font-bold uppercase mb-4 flex items-center gap-2">
-            <Bookmark size={14} /> Saved Items
-          </h3>
-          <ul className="space-y-3 text-sm">
-            <li className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-100 transition-all cursor-pointer group">
-              <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                <Bookmark size={14} />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-800">UI Design Patterns</p>
-                <p className="text-xs text-slate-500 mt-0.5">Saved 2 days ago</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-100 transition-all cursor-pointer group">
-              <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 flex-shrink-0 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                <Bookmark size={14} />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-800">React Hooks Guide</p>
-                <p className="text-xs text-slate-500 mt-0.5">Saved 1 week ago</p>
-              </div>
-            </li>
-          </ul>
-        </section>
-
-        {/* Recent Activity */}
-        <section>
-          <h3 className="text-xs tracking-wider text-slate-400 font-bold uppercase mb-4 flex items-center gap-2">
-            <Clock size={14} /> Recent Activity
-          </h3>
-          <ul className="space-y-2 text-sm">
-            {history.length === 0 ? (
-              <li className="text-slate-400 italic px-2 text-xs">No recent searches.</li>
-            ) : (
-              history.map((item, i) => (
-                <li key={i} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-100 transition-all cursor-pointer">
-                  <div className="flex items-center gap-3 w-full">
-                    <Clock size={14} className="text-indigo-400 flex-shrink-0" />
-                    <span className="text-slate-700 truncate font-medium">{item}</span>
-                  </div>
-                </li>
-              ))
-            )}
-          </ul>
-        </section>
-
-        {/* Notifications */}
-        <section>
-          <h3 className="text-xs tracking-wider text-slate-400 font-bold uppercase mb-4 flex items-center gap-2">
-            <Bell size={14} /> Notifications
-          </h3>
-          <div className="space-y-3">
-            <div className="p-4 bg-white border border-indigo-100 rounded-xl shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 group-hover:w-1.5 transition-all"></div>
-              <p className="text-sm font-semibold text-slate-900">System Update</p>
-              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">Version 2.0 is now live with enhanced layout and features.</p>
-            </div>
-            <div className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-300 group-hover:w-1.5 transition-all"></div>
-              <p className="text-sm font-semibold text-slate-900">Weekly Summary</p>
-              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">You ran {history.length || 14} searches this week.</p>
-            </div>
+    <aside 
+      className={`fixed left-0 top-0 h-screen bg-slate-950 text-slate-300 flex flex-col transition-all duration-300 ease-in-out z-[100] ${
+        isCollapsed ? "w-[72px]" : "w-[280px]"
+      } ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
+    >
+      {/* Header */}
+      <div className="p-4 flex items-center justify-between h-16 border-b border-slate-800/50">
+        {!isCollapsed && (
+          <Link href="/" className="flex items-center gap-2 text-white font-extrabold tracking-tight truncate">
+            <Zap className="fill-indigo-500 text-indigo-500" size={20} />
+            <span>Agentic AI</span>
+          </Link>
+        )}
+        {isCollapsed && (
+          <div className="flex justify-center w-full">
+            <Zap className="fill-indigo-500 text-indigo-500" size={24} />
           </div>
-        </section>
+        )}
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-1.5 rounded-lg bg-slate-800/50 hover:bg-slate-800 hover:text-white transition-colors absolute -right-3 top-20 shadow-lg border border-slate-700 md:flex hidden items-center justify-center"
+        >
+          {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
+      </div>
+
+      {/* New Chat Button */}
+      <div className="p-4">
+        <button 
+          title={isCollapsed ? "New Chat" : ""}
+          className={`flex items-center gap-3 w-full bg-slate-800 hover:bg-indigo-600 hover:text-white transition-all duration-300 rounded-xl font-bold p-3.5 overflow-hidden group/newchat shadow-md active:scale-95 ${isCollapsed ? "justify-center" : ""}`}
+        >
+          <Plus size={20} className="flex-shrink-0 group-hover/newchat:rotate-90 transition-transform duration-300" />
+          {!isCollapsed && <span className="whitespace-nowrap transition-opacity text-sm">New Chat</span>}
+        </button>
+      </div>
+
+      {/* History section */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 custom-scrollbar-visible">
+        {!isCollapsed && (
+          <p className="px-3 text-[10px] font-extrabold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+            <History size={12} /> Recent History
+          </p>
+        )}
+        
+        <div className="space-y-1.5 focus-within:ring-2 ring-indigo-500/20 rounded-xl">
+          {history.length === 0 ? (
+            !isCollapsed && (
+              <p className="px-3 py-3 text-xs text-slate-600 italic">No recent chats</p>
+            )
+          ) : (
+            history.map((item, i) => (
+              <div 
+                key={i} 
+                title={isCollapsed ? item : ""}
+                className={`group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800/80 cursor-pointer transition-all active:bg-slate-800 ${
+                  isCollapsed ? "justify-center" : ""
+                }`}
+              >
+                <div className="relative">
+                  <MessageSquare size={18} className="flex-shrink-0 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                  {isCollapsed && <div className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full scale-0 group-hover:scale-100 transition-transform"></div>}
+                </div>
+                {!isCollapsed && (
+                  <span className="flex-1 truncate text-sm text-slate-400 group-hover:text-slate-100 font-medium">
+                    {item}
+                  </span>
+                )}
+              </div>
+            ))
+          )}
+          
+          {/* Example dummy items */}
+          <div title={isCollapsed ? "Design UI strategy" : ""} className={`group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800/80 cursor-pointer transition-all ${isCollapsed ? "justify-center" : ""}`}>
+             <MessageSquare size={18} className="flex-shrink-0 text-slate-500 group-hover:text-indigo-400" />
+             {!isCollapsed && <span className="flex-1 truncate text-sm text-slate-400 group-hover:text-slate-100 font-medium lowercase">design ui strategy</span>}
+          </div>
+          <div title={isCollapsed ? "Researching AI agents" : ""} className={`group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800/80 cursor-pointer transition-all ${isCollapsed ? "justify-center" : ""}`}>
+             <MessageSquare size={18} className="flex-shrink-0 text-slate-500 group-hover:text-indigo-400" />
+             {!isCollapsed && <span className="flex-1 truncate text-sm text-slate-400 group-hover:text-slate-100 font-medium lowercase">researching ai agents</span>}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-slate-800/50">
+        <div className={`flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800 cursor-pointer transition-colors ${isCollapsed ? "justify-center" : ""}`}>
+           <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+             JD
+           </div>
+           {!isCollapsed && (
+             <div className="flex-1 truncate">
+               <p className="text-xs font-bold text-white">John Doe</p>
+               <p className="text-[10px] text-slate-500 truncate">john@agentic.ai</p>
+             </div>
+           )}
+           {!isCollapsed && <MoreHorizontal size={14} className="text-slate-600" />}
+        </div>
       </div>
     </aside>
   );

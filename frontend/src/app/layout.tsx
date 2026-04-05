@@ -1,5 +1,4 @@
 import "./globals.css";
-import Navbar from "./Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { Inter } from "next/font/google";
 
@@ -17,8 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased text-slate-900 bg-slate-50 min-h-screen flex flex-col`}>
-        <Navbar />
+      <body className={`${inter.className} antialiased text-slate-900 bg-white min-h-screen flex flex-col`}>
         {children}
         <Toaster richColors />
       </body>
