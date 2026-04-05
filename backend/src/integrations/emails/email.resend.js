@@ -19,7 +19,7 @@ const sendVerificationEmail = async (email, name, verifyCode) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Agent <noreply@tabish.tech>",
+      from: "Agent <noreply.agent@retube.live>",
       to: [email],
       subject: "Agent | Verification Code",
       html: emailHTML,
@@ -43,7 +43,7 @@ const sendSecurityCodeMail = async (email, name, verifyCode) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Agent <noreply@tabish.tech>",
+      from: "Agent <noreply.agent@retube.live>",
       to: [email],
       subject: "Agent | Security Code",
       html: emailHTML,
@@ -66,7 +66,7 @@ const sendWelcomeEmail = async (email, name) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Agent <noreply@tabish.tech>",
+      from: "Agent <noreply.agent@retube.live>",
       to: [email],
       subject: "Agent | Successful Registration",
       html: emailHTML,
@@ -76,7 +76,7 @@ const sendWelcomeEmail = async (email, name) => {
       throw new APIError(500, error.message);
     }
 
-    return { message: "regsitration/welcome email sent successfully", email };
+    return { message: "registration/welcome email sent successfully", email };
   } catch (err) {
     throw new APIError(
       500,
