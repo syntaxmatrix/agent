@@ -17,6 +17,8 @@ function cleanJsonString(str) {
     .trim();                    // clean extra spaces
 }
 
+import Message from "../models/message.model.js";
+
 /**
  * Test Function for Gemini Response.
  * @param {Object} req - Express request object.
@@ -25,7 +27,12 @@ function cleanJsonString(str) {
 const intentCheck = asyncHandler(async (req, res) => { 
   try {
     // q is the natural-language query from the client.
-    let { q } = req?.query
+    let { q, conversationId } = req?.query;
+    
+    if (!conversationId) {
+      throw new APIError(400, "conversationId is required");
+    }
+
     // Logged-in user's Gmail refresh token, used for Gmail actions.
     let googleRefreshToken = req?.user?.googleRefreshToken;
     // ans will hold the final response based on selected route.
@@ -43,6 +50,23 @@ const intentCheck = asyncHandler(async (req, res) => {
       // Fallback when model route is unknown.
       ans = "No valid route found in the response.";
     }
+
+    // Save User Message
+    await Message.create({
+      userId: req.user._id,
+      role: "user",
+      content: q,
+      conversationId
+    });
+
+    // Save AI Message
+    await Message.create({
+      userId: req.user._id,
+      role: "ai",
+      content: ans || "No answer generated",
+      conversationId
+    });
+
     // Return both routing metadata and generated answer.
     res.json({ ok: true, text: text , ans: ans || "No answer generated" });
   } catch (err) {

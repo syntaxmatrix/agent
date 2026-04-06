@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { 
   PanelLeft, 
   Plus, 
@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 import axios from "@/lib/axios"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import Link from "next/link"
 
@@ -24,16 +24,37 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, toggle }: SidebarProps) {
   const { isAuthenticated, user, refresh } = useAuth();
-  const [activeChat, setActiveChat] = useState<number | null>(0)
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentConversationId = searchParams?.get("conversationId");
 
-  const recentHistory = [
-    "Quantum computing for kids",
-    "Modern SaaS architecture 2026",
-    "Tailwind CSS v4 features",
-    "React Server Components deep dive",
-    "The future of Agentic AI",
-  ]
+  const [recentHistory, setRecentHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchHistory = async () => {
+        try {
+          const res = await axios.get("http://localhost:8000/api/history", {
+            withCredentials: true
+          });
+          if (res.data?.ok) {
+            setRecentHistory(res.data.history);
+          }
+        } catch (err) {
+          console.warn("Failed to load history", err);
+        }
+      };
+      // Fetch history initially
+      fetchHistory();
+      
+      const handleChatUpdate = () => {
+        fetchHistory();
+      };
+      
+      window.addEventListener("chatUpdated", handleChatUpdate);
+      return () => window.removeEventListener("chatUpdated", handleChatUpdate);
+    }
+  }, [isAuthenticated]);
 
   const handleLogout = async () => {
     try {
@@ -74,13 +95,19 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
 
       {/* Action: New Chat */}
       <div className="px-4 mb-6 shrink-0">
-        <Link href="/chats" className={cn(
-          "w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-all shadow-md active:scale-95",
-          !isOpen && "justify-center px-0 shrink-0"
-        )}>
+        <button 
+          onClick={() => {
+            router.push("/chats");
+            window.dispatchEvent(new Event("resetChatWindow"));
+          }}
+          className={cn(
+            "w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-all shadow-md active:scale-95",
+            !isOpen && "justify-center px-0 shrink-0"
+          )}
+        >
           <Plus size={20} />
           {isOpen && <span>New Chat</span>}
-        </Link>
+        </button>
       </div>
 
       {/* Navigation */}
@@ -101,21 +128,26 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
           <div className="mb-4">
             <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recent Activity</h3>
             <div className="space-y-1">
-              {recentHistory.map((chat, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveChat(idx)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left group",
-                    activeChat === idx 
-                      ? "bg-slate-100 text-slate-900 font-semibold shadow-sm border border-slate-200/50" 
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-                  )}
-                >
-                  <MessageSquare size={16} className={cn("shrink-0", activeChat === idx ? "text-slate-900" : "text-slate-300 group-hover:text-slate-400")} />
-                  <span className="truncate">{chat}</span>
-                </button>
-              ))}
+              {recentHistory.map((chat: any, idx) => {
+                const isActive = currentConversationId === chat._id;
+                return (
+                  <button
+                    key={chat._id || idx}
+                    onClick={() => {
+                      router.push(`/chats?conversationId=${chat._id}`);
+                    }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left group",
+                      isActive 
+                        ? "bg-slate-100 text-slate-900 font-semibold shadow-sm border border-slate-200/50" 
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                    )}
+                  >
+                    <MessageSquare size={16} className={cn("shrink-0", isActive ? "text-slate-900" : "text-slate-300 group-hover:text-slate-400")} />
+                    <span className="truncate">{typeof chat.latestMessage === "string" ? chat.latestMessage : "New Chat"}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
