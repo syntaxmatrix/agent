@@ -19,6 +19,7 @@ import axios from "@/lib/axios";
 import { AxiosError } from "axios";
 import { toast } from "sonner"
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export function LoginForm({
   className,
@@ -26,6 +27,7 @@ export function LoginForm({
 }: React.ComponentProps<"form">) {
   const [isSubmiting,setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { refresh } = useAuth();
   //zod
   const form = useForm<LoginInput>({
     resolver:zodResolver(LoginSchema),
@@ -41,6 +43,12 @@ export function LoginForm({
       toast.success("You are Successfully Logged In",{
         description: response.data.message
       })
+      try {
+        // Refresh auth context so client knows user is authenticated
+        await refresh();
+      } catch (e) {
+        // ignore refresh errors; we'll still attempt navigation
+      }
       router.replace("/chats");
       setIsSubmitting(false)
     } catch (error) {

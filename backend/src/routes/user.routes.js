@@ -35,7 +35,8 @@ router.route("/register").post(registerUser); // example.com/api/v1/user/registe
 // LOGIN USER
 router.route("/login").post(loginUser); // example.com/api/v1/user/login
 
-router.route("/otp").get(sendSecurityCode); // example.com/api/v1/user/otp
+// Support both GET (query) and POST (body) for OTP so frontend callers work
+router.route("/otp").get(sendSecurityCode).post(sendSecurityCode); // example.com/api/v1/user/otp
 
 // ## Unsecured Routes #Ends
 

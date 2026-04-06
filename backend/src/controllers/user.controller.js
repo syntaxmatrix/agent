@@ -40,11 +40,16 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 /**
  * Default cookies options.
+ * - `secure` must only be true in production (HTTPS). Browsers won't accept
+ *   secure cookies over plain HTTP during local development.
+ * - `sameSite` is set to "None" in production to allow cross-site usage when
+ *   frontend and backend are on different origins; in development we use
+ *   "Lax" to improve compatibility.
  */
 const cookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: "None",
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
 };
 
 /**
@@ -155,11 +160,11 @@ const registerUser = asyncHandler(async (req, res) => {
     );
   }
 
-  // Cookie options for tempToken
+  // Cookie options for tempToken (follow same env rules as `cookieOptions`)
   const tempTokenCookieOptions = {
     httpOnly: true,
-    secure: true,
-    sameSite: "None", // critical for cross-origin cookies
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     maxAge: 1000 * 60 * 15, // 15 min expiry for tempToken
   };
   console.log("Regsiter Route End");
@@ -671,13 +676,14 @@ const sendSecurityCodeLogged = asyncHandler(async (req, res) => {
  */
 const sendSecurityCode = asyncHandler(async (req, res) => {
   // Password-reset security code request payload.
-  const email = req.body.email;
+  // Accept email from either body (POST) or query (GET) to support both client calls.
+  const email = req.body?.email ?? req.query?.email;
 
   if (!email) {
     throw new APIError(400, "Email is required to send security code");
   }
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: String(email) });
 
   if (!user) {
     throw new APIError(404, "User with this email doesn't exist");
