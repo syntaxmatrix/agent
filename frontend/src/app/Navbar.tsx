@@ -25,13 +25,13 @@ export default function Navbar({ }: NavbarProps) {
         {/* Right Side: Auth Buttons */}
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/signin"
+            href="/login"
             className="px-4 py-2 text-[13px] font-semibold text-slate-400 hover:text-white transition-all duration-200"
           >
             Login
           </Link>
           <Link
-            href="/signup"
+            href="/register"
             className="relative px-5 py-2 text-[13px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-full transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md shadow-indigo-500/10"
           >
             Sign Up
@@ -40,4 +40,4 @@ export default function Navbar({ }: NavbarProps) {
       </div>
     </nav>
   );
-}
+}

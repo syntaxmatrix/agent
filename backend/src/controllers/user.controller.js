@@ -427,7 +427,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     // Persist local auth cookies after Google login/upsert.
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
-    .redirect(`${process.env.DOMAIN}/chat?message=${encodeURIComponent(messageSuccess)}`);
+    .redirect(`${process.env.DOMAIN}/chats?message=${encodeURIComponent(messageSuccess)}`);
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -455,7 +455,7 @@ const getEncryptedEmail = asyncHandler(async (req, res) => {  // #Need to Remove
   if (!accessToken) {
     throw new APIError(404, "No accessToken cookie found for Google Auth.");
   }
-  const { email } = jwt.verify(accessToken, secret);
+  const { email } = await jwt.verify(accessToken, secret);
 
   if (!email) {
     throw new APIError(400, "Email ID is required");
@@ -477,6 +477,18 @@ const getEncryptedEmail = asyncHandler(async (req, res) => {  // #Need to Remove
         "Successfully Encrypted Email for Googgle Auth"
       )
     );
+});
+
+/**
+ * Return current authenticated user (safe fields).
+ */
+const getMe = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    throw new APIError(401, "Unauthorized");
+  }
+  // req.user is already selected without password and refreshToken in auth middleware
+  return res.status(200).json(new APIResponse(200, { user }, "User fetched"));
 });
 
 
@@ -757,5 +769,6 @@ export {
   logoutUser,
   registerUserGoogle,
   getEncryptedEmail,
-  gmailLink
+  gmailLink,
+  getMe,
 };

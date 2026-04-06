@@ -4,13 +4,12 @@ import React from "react"
 import { Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import UserMenu from "@/components/UserMenu"
 
 interface HeaderProps {
-  isLoggedIn: boolean
-  onLogin: () => void
 }
 
-export default function Header({ isLoggedIn, onLogin }: HeaderProps) {
+export default function Header({ }: HeaderProps) {
   return (
     <header className="h-20 flex items-center justify-between px-8 bg-transparent relative z-30">
       {/* Left Section */}
@@ -24,26 +23,9 @@ export default function Header({ isLoggedIn, onLogin }: HeaderProps) {
       {/* Center Section - Removed per request */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0"></div>
 
-      {/* Right Section - Auth Buttons (Only if not logged in) */}
+      {/* Right Section - User Menu */}
       <div className="flex items-center gap-3">
-        {!isLoggedIn ? (
-          <>
-            <Link 
-              href="/signin"
-              className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              Login
-            </Link>
-            <Link 
-              href="/signup"
-              className="px-6 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-2xl hover:bg-slate-800 transition-all shadow-md shadow-slate-200 active:scale-95"
-            >
-              Sign Up
-            </Link>
-          </>
-        ) : (
-          <div className="w-[120px]" /> /* Spacer to keep balance if needed */
-        )}
+        <UserMenu />
       </div>
     </header>
   )

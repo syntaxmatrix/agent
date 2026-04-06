@@ -1,5 +1,7 @@
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import LogoutHandler from "@/components/LogoutHandler";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata = {
   title: "Agentic AI - Assistant v2.6",
@@ -13,9 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen">
-        {children}
-        <Toaster richColors />
+      <body suppressHydrationWarning className="antialiased min-h-screen">
+        <AuthProvider>
+          <LogoutHandler />
+          {children}
+          <Toaster richColors />
+        </AuthProvider>
       </body>
     </html>
   );

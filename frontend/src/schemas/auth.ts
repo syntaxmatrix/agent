@@ -29,14 +29,9 @@ export const RegisterSchema = z
 
 export const LoginSchema = z.object({
   email: z.string().email("Invalid Email Address"),
-  password: z
-    .string()
-    .min(8, "Incorrect Passsword")
-    .max(15, "Incorrect Passsword")
-    .regex(/[A-Z]/, "Incorrect Passsword")
-    .regex(/[a-z]/, "Incorrect Passsword")
-    .regex(/[0-9]/, "Incorrect Passsword")
-    .regex(/[\W_]/, "Incorrect Passsword"),
+  // Backend accepts any non-empty password; keep client validation minimal to avoid
+  // rejecting valid backend passwords (do not enforce complexity here).
+  password: z.string().min(1, "Password is required"),
 });
 
 export const VerifyCodeSchema = z.object({

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import { useRouter } from "next/navigation";
 import Image from "next/image"
 import {
   Sparkles,
@@ -14,9 +15,12 @@ import {
   ArrowUpRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/context/AuthContext"
 
-export default function DashboardPage({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
+export default function DashboardPage() {
   const [isScrolled, setIsScrolled] = useState(false)
+  const { user, isAuthenticated } = useAuth();
+  const userName = user?.name || "Agentic AI";
 
   useEffect(() => {
     const handleScroll = (e: any) => {
@@ -68,7 +72,7 @@ export default function DashboardPage({ isLoggedIn = false }: { isLoggedIn?: boo
     { name: "Create Music", icon: Music }
   ]
 
-  const shouldFloat = !isLoggedIn && isScrolled
+  const shouldFloat = !isAuthenticated && isScrolled
 
   return (
     <div className="flex flex-col gap-12 pt-4 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -81,7 +85,7 @@ export default function DashboardPage({ isLoggedIn = false }: { isLoggedIn?: boo
               Intelligence v2.6
             </div>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-slate-800 leading-[1.05] tracking-tight">
-              Hi Agentic AI, <br />
+              Hi {userName}, <br />
               <span className="text-slate-400">Ready to Achieve Great Things?</span>
             </h1>
             <p className="text-lg text-slate-500 leading-relaxed font-medium">
@@ -89,7 +93,7 @@ export default function DashboardPage({ isLoggedIn = false }: { isLoggedIn?: boo
             </p>
 
             {/* Static Search Bar Position (Hidden when floating) */}
-            <div className={cn(
+              <div className={cn(
               "transition-all duration-500 ease-in-out w-full max-w-2xl mx-auto md:mx-0",
               shouldFloat ? "opacity-0 pointer-events-none scale-95" : "opacity-100"
             )}>
@@ -184,16 +188,29 @@ export default function DashboardPage({ isLoggedIn = false }: { isLoggedIn?: boo
 }
 
 function InputBar({ actions }: { actions: any[] }) {
+  const [text, setText] = useState("");
+  const router = useRouter();
+
+  const handleSend = () => {
+    const q = text.trim();
+    if (!q) return;
+    router.push(`/chats?q=${encodeURIComponent(q)}`);
+    setText("");
+  };
+
   return (
     <div className="glass rounded-[2rem] border border-white/60 human-shadow p-3 ring-8 ring-slate-900/5 shadow-2xl">
       <div className="flex flex-col gap-3">
         <div className="relative">
           <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
             type="text"
             placeholder="Example: Explain quantum computing in simple terms"
             className="w-full bg-transparent px-6 py-5 text-base focus:outline-none placeholder:text-slate-300 font-medium pr-16"
           />
           <button
+            onClick={handleSend}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-4 bg-slate-900 text-white rounded-2xl shadow-lg hover:bg-slate-800 active:scale-95 transition-all"
             aria-label="Send message"
           >

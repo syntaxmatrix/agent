@@ -1,6 +1,8 @@
 "use client"
 
 import React, { useState } from "react"
+import RequireAuth from "@/components/RequireAuth";
+import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/layout/Sidebar"
 import Header from "@/components/layout/Header"
 import { cn } from "@/lib/utils"
@@ -11,9 +13,13 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [isLoggedIn, setIsLoggedIn] = useState(false) // Toggle this for demo
+  const { loading, isAuthenticated, user } = useAuth();
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  }
 
   return (
     <div className="min-h-screen flex bg-background text-foreground overflow-hidden">
@@ -21,8 +27,6 @@ export default function DashboardLayout({
       <Sidebar 
         isOpen={isSidebarOpen} 
         toggle={toggleSidebar} 
-        isLoggedIn={isLoggedIn} 
-        onLogin={() => setIsLoggedIn(true)}
       />
       
       {/* Main Content Area */}
@@ -32,14 +36,13 @@ export default function DashboardLayout({
           isSidebarOpen ? "pl-64" : "pl-16"
         )}
       >
-        <Header 
-          isLoggedIn={isLoggedIn}
-          onLogin={() => setIsLoggedIn(true)}
-        />
+        <Header />
         
         <main className="flex-1 overflow-y-auto custom-scrollbar">
           <div className="max-w-[1400px] mx-auto p-4 md:p-8 lg:p-10 pb-32">
-            {children}
+            <RequireAuth>
+              {children}
+            </RequireAuth>
           </div>
         </main>
       </div>

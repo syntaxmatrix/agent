@@ -8,4 +8,13 @@ const instance = axios.create({
   withCredentials: true, 
 });
 
+// Response interceptor: on 401, we just reject.
+// The AuthContext and RequireAuth will manage redirects.
+instance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export default instance;

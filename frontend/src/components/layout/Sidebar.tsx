@@ -7,19 +7,25 @@ import {
   MessageSquare,
   Sparkles,
   LogOut,
-  User
+  User,
+  LayoutDashboard
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/context/AuthContext"
+import axios from "@/lib/axios"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import Link from "next/link"
 
 interface SidebarProps {
   isOpen: boolean
   toggle: () => void
-  isLoggedIn: boolean
-  onLogin: () => void
 }
 
-export default function Sidebar({ isOpen, toggle, isLoggedIn, onLogin }: SidebarProps) {
+export default function Sidebar({ isOpen, toggle }: SidebarProps) {
+  const { isAuthenticated, user, refresh } = useAuth();
   const [activeChat, setActiveChat] = useState<number | null>(0)
+  const router = useRouter();
 
   const recentHistory = [
     "Quantum computing for kids",
@@ -27,30 +33,38 @@ export default function Sidebar({ isOpen, toggle, isLoggedIn, onLogin }: Sidebar
     "Tailwind CSS v4 features",
     "React Server Components deep dive",
     "The future of Agentic AI",
-    "Healthy breakfast recipes",
-    "Travel itinerary for Tokyo",
-    "Python optimization tips"
   ]
+
+  const handleLogout = async () => {
+    try {
+      await axios.post("/api/user/logout");
+      toast.success("Successfully Logged Out");
+      await refresh();
+      router.push("/login");
+    } catch (error) {
+      toast.error("Logout Failed");
+    }
+  };
 
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border z-50 flex flex-col sidebar-transition",
-        isOpen ? "w-64" : "w-16"
+        "fixed left-0 top-0 h-screen bg-white border-r border-slate-200 z-50 flex flex-col transition-all duration-300 ease-in-out",
+        isOpen ? "w-64" : "w-20"
       )}
     >
       {/* Sidebar Header: Logo & Toggle */}
-      <div className="h-20 flex items-center justify-between px-4 shrink-0">
-        <div className={cn("flex items-center gap-3 transition-opacity duration-300", !isOpen && "opacity-0 pointer-events-none")}>
-          <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white human-shadow active:scale-95 transition-transform">
+      <div className="h-20 flex items-center justify-between px-5 shrink-0">
+        <Link href="/" className={cn("flex items-center gap-3 transition-opacity duration-300", !isOpen && "opacity-0 pointer-events-none")}>
+          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-lg active:scale-95 transition-transform">
             <Sparkles size={20} />
           </div>
-          <span className="font-display font-bold text-slate-800 text-lg">Agentic AI</span>
-        </div>
+          <span className="font-bold text-slate-800 text-lg tracking-tight">Agentic AI</span>
+        </Link>
         <button 
           onClick={toggle}
           className={cn(
-            "p-2 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground/60",
+            "p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-900",
             !isOpen && "mx-auto"
           )}
         >
@@ -59,21 +73,33 @@ export default function Sidebar({ isOpen, toggle, isLoggedIn, onLogin }: Sidebar
       </div>
 
       {/* Action: New Chat */}
-      <div className="px-3 mb-6 shrink-0">
-        <button className={cn(
-          "w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-white border border-sidebar-border text-slate-700 font-medium hover:bg-slate-50 transition-all hover-lift active:scale-95",
+      <div className="px-4 mb-6 shrink-0">
+        <Link href="/chats" className={cn(
+          "w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-all shadow-md active:scale-95",
           !isOpen && "justify-center px-0 shrink-0"
         )}>
-          <Plus size={20} className="text-slate-400" />
+          <Plus size={20} />
           {isOpen && <span>New Chat</span>}
-        </button>
+        </Link>
+      </div>
+
+      {/* Navigation */}
+      <div className="px-4 mb-4 shrink-0">
+        <Link href="/" className={cn(
+          "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
+          "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+          !isOpen && "justify-center"
+        )}>
+          <LayoutDashboard size={18} />
+          {isOpen && <span>Dashboard</span>}
+        </Link>
       </div>
 
       {/* Recent History - Scrollable */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-3 space-y-1">
+      <div className="flex-1 overflow-y-auto px-4 space-y-1 py-4 border-t border-slate-100">
         {isOpen && (
           <div className="mb-4">
-            <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recent History</h3>
+            <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recent Activity</h3>
             <div className="space-y-1">
               {recentHistory.map((chat, idx) => (
                 <button
@@ -82,8 +108,8 @@ export default function Sidebar({ isOpen, toggle, isLoggedIn, onLogin }: Sidebar
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left group",
                     activeChat === idx 
-                      ? "bg-slate-200/50 text-slate-900 font-medium shadow-sm border border-slate-200/50" 
-                      : "text-slate-500 hover:bg-sidebar-accent hover:text-slate-800"
+                      ? "bg-slate-100 text-slate-900 font-semibold shadow-sm border border-slate-200/50" 
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
                   )}
                 >
                   <MessageSquare size={16} className={cn("shrink-0", activeChat === idx ? "text-slate-900" : "text-slate-300 group-hover:text-slate-400")} />
@@ -96,32 +122,41 @@ export default function Sidebar({ isOpen, toggle, isLoggedIn, onLogin }: Sidebar
       </div>
 
       {/* Bottom Profile Section */}
-      <div className="p-3 border-t border-sidebar-border shrink-0">
-        {isLoggedIn ? (
+      <div className="p-4 border-t border-slate-100 shrink-0">
+        {isAuthenticated && user ? (
           <div className={cn(
-            "flex items-center gap-3 p-2 rounded-2xl hover:bg-sidebar-accent transition-all cursor-pointer group",
-            !isOpen && "justify-center"
+            "flex items-center gap-3 p-2 rounded-2xl bg-slate-50 border border-slate-200/50 group",
+            !isOpen && "justify-center border-none bg-transparent"
           )}>
-            <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 overflow-hidden shrink-0">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden shrink-0 border-2 border-white shadow-sm">
               <User size={20} />
             </div>
             {isOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 truncate">Agentic User</p>
-                <p className="text-xs text-slate-500 truncate">user@agentic.ai</p>
+                <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
+                <p className="text-[10px] text-slate-500 truncate font-medium uppercase tracking-tight">{user.email}</p>
               </div>
+            )}
+            {isOpen && (
+              <button 
+                onClick={handleLogout} 
+                title="Logout" 
+                className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <LogOut size={16} />
+              </button>
             )}
           </div>
         ) : (
           isOpen && (
-            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/50">
-              <p className="text-xs text-slate-500 mb-3 text-center">Login to sync your history</p>
-              <button 
-                onClick={onLogin}
-                className="w-full py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-all"
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/50 text-center">
+              <p className="text-xs font-semibold text-slate-500 mb-3">Save your conversations</p>
+              <Link 
+                href="/login"
+                className="block w-full py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-95"
               >
                 Sign In
-              </button>
+              </Link>
             </div>
           )
         )}

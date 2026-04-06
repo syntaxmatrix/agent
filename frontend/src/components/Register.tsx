@@ -46,6 +46,20 @@ export function RegisterForm({
   const handleContinue = async () => {
     const isEmailValid = await form.trigger("email");
     if (!isEmailValid) return;
+    // Check email availability with backend
+    try {
+      const email = form.getValues("email");
+      const res = await axios.get("/api/user/emailavailability", { params: { email } });
+      const msg = res.data?.message || "";
+      if (msg.includes("Already Registered")) {
+        toast.error("Email already registered. Try login instead.");
+        return;
+      }
+    } catch (err: any) {
+      const m = err?.response?.data?.message ?? err?.message ?? "Failed to validate email";
+      toast.error(m);
+      return;
+    }
     setStep(2);
   };
 
@@ -117,7 +131,7 @@ export function RegisterForm({
         {step === 1 && (
           <>
             <Field>
-              <Button variant="outline" type="button" onClick={() => window.location.href = "/google"}>
+              <Button variant="outline" type="button" onClick={() => window.location.href = "/api/user/google"}>
                 <img src="/google.png" alt="Google" className="mr-2 h-4 w-4" />
                 Register with Google
               </Button>

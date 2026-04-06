@@ -6,7 +6,7 @@ const ai = new GoogleGenAI({
 
 async function routeQuery(query) {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-2.5-flash",
 
     contents: `
 You are a router for an AI assistant.
@@ -49,7 +49,7 @@ User query: "${query}"
 
 async function chatQuery(query) {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-2.5-flash",
 
     contents: `
 You are an AI assistant.
@@ -77,7 +77,7 @@ User query: "${query}"
 
 async function draftMail(query) {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-2.5-flash",
 
     contents: `
 You are a professional email writer.

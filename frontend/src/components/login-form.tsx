@@ -14,7 +14,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema, LoginInput } from "@/schemas/auth";
-import axios, { AxiosError } from "axios";
+import axios from "@/lib/axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner"
 import { useRouter } from "next/navigation";
 
@@ -68,7 +69,7 @@ export function LoginForm({
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Password</FieldLabel>
             <a
-              href="#"
+              href="/forgot"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
@@ -83,7 +84,7 @@ export function LoginForm({
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
-          <Button variant="outline" type="button" onClick={() => window.location.href = "/google"}>
+          <Button variant="outline" type="button" onClick={() => window.location.href = "/api/user/google"}>
             <img src="/google.png" alt="Google" className="mr-2 h-4 w-4" />
             Login with Google
           </Button>
