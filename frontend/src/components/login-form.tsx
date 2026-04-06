@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Mail, Lock } from "lucide-react"
 import {
   Field,
   FieldDescription,
@@ -63,15 +64,20 @@ export function LoginForm({
   return (
     <form className={cn("flex flex-col gap-6", className)} onSubmit={form.handleSubmit(onSubmit)} {...props}>
       <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
-          <p className="text-sm text-balance text-muted-foreground">
-            Enter your email below to login to your account
-          </p>
+        <div className="header">
+          <div className="flex flex-col text-left">
+            <h1 className="text-2xl font-bold">Login to your account</h1>
+          </div>
+          <a href="/register" className="text-sm font-medium text-primary hover:underline">
+            Sign Up
+          </a>
         </div>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required {...form.register("email")} />
+          <div className="input-wrapper">
+            <Mail className="input-icon" size={18} />
+            <Input className="input" id="email" type="email" placeholder="m@example.com" required {...form.register("email")} />
+          </div>
         </Field>
         <Field>
           <div className="flex items-center">
@@ -83,10 +89,13 @@ export function LoginForm({
               Forgot your password?
             </a>
           </div>
-          <Input id="password" type="password" required {...form.register("password")} />
+          <div className="input-wrapper">
+            <Lock className="input-icon" size={18} />
+            <Input className="input" id="password" type="password" required {...form.register("password")} />
+          </div>
         </Field>
         <Field>
-          <Button type="submit" disabled={isSubmiting}>
+          <Button className="btn-primary" type="submit" disabled={isSubmiting}>
             {isSubmiting ? "Logging in..." : "Login"} 
           </Button>
         </Field>
@@ -96,12 +105,6 @@ export function LoginForm({
             <img src="/google.png" alt="Google" className="mr-2 h-4 w-4" />
             Login with Google
           </Button>
-          <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
-            <a href="/register" className="underline underline-offset-4">
-              Register
-            </a>
-          </FieldDescription>
         </Field>
       </FieldGroup>
     </form>

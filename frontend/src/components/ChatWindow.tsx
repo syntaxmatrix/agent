@@ -24,6 +24,24 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const loadingMessages = [
+    "Generating...",
+    "Working...",
+    "Loading...",
+    "Thinking..."
+  ];
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    if (!loading) return;
+  
+    const interval = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 1500);
+  
+    return () => clearInterval(interval);
+  }, [loading]);
+
   // Auto scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
@@ -79,6 +97,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
 
   const send = async (e?: React.FormEvent) => {
     e?.preventDefault();
+    if (loading) return;
     const q = input.trim();
     if (!q) return;
 
@@ -188,9 +207,14 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
           </div>
         ))}
         {loading && (
-          <div className="flex items-center gap-3 text-slate-400 animate-pulse pl-12 font-bold tracking-tight text-xs uppercase">
-            <Loader2 size={16} className="animate-spin" />
-            Generating Response...
+          <div className="flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300 flex-row">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-slate-900 border-slate-900 text-white">
+              <Bot size={18} />
+            </div>
+            <div className="max-w-[80%] px-6 py-4 rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm bg-white text-slate-800 rounded-tl-none border border-slate-100 flex items-center gap-3">
+              <Loader2 size={16} className="animate-spin text-slate-400" />
+              <span className="text-slate-500 animate-pulse">{loadingMessages[messageIndex]}</span>
+            </div>
           </div>
         )}
       </div>
@@ -208,7 +232,8 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 bg-transparent px-2 py-4 text-sm font-semibold focus:outline-none placeholder:text-slate-300 text-slate-800"
+              disabled={loading}
+              className="flex-1 bg-transparent px-2 py-4 text-sm font-semibold focus:outline-none placeholder:text-slate-300 text-slate-800 disabled:opacity-50"
               placeholder="Message Agentic AI..."
             />
             <div className="flex items-center gap-1.5 pr-2">
