@@ -7,8 +7,7 @@ import {
   MessageSquare,
   Sparkles,
   LogOut,
-  User,
-  LayoutDashboard
+  User
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -101,18 +100,6 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
         )}>
           <Plus size={20} />
           {isOpen && <span>New Chat</span>}
-        </Link>
-      </div>
-
-      {/* Navigation */}
-      <div className="px-4 mb-4 shrink-0">
-        <Link href="/" className={cn(
-          "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
-          "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-          !isOpen && "justify-center"
-        )}>
-          <LayoutDashboard size={18} />
-          {isOpen && <span>Dashboard</span>}
         </Link>
       </div>
 
