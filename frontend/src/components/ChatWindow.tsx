@@ -144,19 +144,18 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
 
       setMessages((s) => [...s, { from: "agent", text: ans }]);
 
-      // Notify sidebar to refresh history
-      window.dispatchEvent(new Event("chatUpdated"));
-
       // Update URL to stay in this conversation context
       if (!conversationId) {
         router.replace(`/chats?conversationId=${convId}`);
       }
 
     } catch (err: any) {
-      const msg = err?.response?.data?.message ?? "Connection interrupted";
-      setMessages((s) => [...s, { from: "agent", text: `Protocol Error: ${msg}` }]);
+      const msg = err?.response?.data?.message || err?.response?.data?.error || err.message || "Connection interrupted";
+      setMessages((s) => [...s, { from: "agent", text: msg }]);
     } finally {
       setLoading(false);
+      // Notify sidebar to refresh history even if AI failed
+      window.dispatchEvent(new Event("chatUpdated"));
     }
   };
 

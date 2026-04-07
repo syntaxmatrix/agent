@@ -6,7 +6,11 @@ export const getRecentConversations = asyncHandler(async (req, res) => {
   const userId = new mongoose.Types.ObjectId(req.user._id);
   // Group by conversationId, get the most recent message for each
   const conversations = await Message.aggregate([
-    { $match: { userId } },
+    { 
+      $match: { 
+        userId: new mongoose.Types.ObjectId(req.user._id)
+      } 
+    },
     { $sort: { createdAt: -1 } },
     {
       $group: {

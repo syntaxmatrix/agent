@@ -40,11 +40,10 @@ User query: "${query}"
 
     config: {
       responseMimeType: "application/json",
-      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
-  return JSON.parse(response.candidates[0].content.parts[0].text);
+  return JSON.parse(response.text());
 }
 
 async function chatQuery(query) {
@@ -68,11 +67,10 @@ User query: "${query}"
 
     config: {
       responseMimeType: "application/json",
-      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
-  return JSON.parse(response.candidates[0].content.parts[0].text);
+  return JSON.parse(response.text());
 }
 
 async function draftMail(query) {
@@ -104,11 +102,10 @@ User request: "${query}"
 
     config: {
       responseMimeType: "application/json",
-      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
-  return JSON.parse(response.candidates[0].content.parts[0].text);
+  return JSON.parse(response.text());
 }
 
 
