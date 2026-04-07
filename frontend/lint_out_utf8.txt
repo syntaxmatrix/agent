@@ -1,0 +1,149 @@
+﻿
+> agent-frontend@0.1.0 lint
+> eslint
+
+
+D:\agent\frontend\src\app\(Auth)\forgot\page.tsx
+   25:16  warning  'e' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   32:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   58:31  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  100:9   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\agent\frontend\src\app\(Auth)\login\page.tsx
+  10:11  error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+D:\agent\frontend\src\app\(Auth)\register\page.tsx
+  11:11  error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+D:\agent\frontend\src\app\(Auth)\reset\page.tsx
+    7:55  warning  'ArrowRight' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   29:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  122:9   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\agent\frontend\src\app\(Auth)\verify-email\page.tsx
+   5:20  warning  'ShieldCheck' is defined but never used                          @typescript-eslint/no-unused-vars
+  41:21  error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  62:15  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  92:17  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\agent\frontend\src\app\(dashboard)\account\page.tsx
+   16:3   warning  'Calendar' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   19:10  warning  'cn' is defined but never used                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   36:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   65:14  warning  'err' is defined but never used                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   65:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   78:14  warning  'err' is defined but never used                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   78:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   92:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  183:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\agent\frontend\src\app\(dashboard)\layout.tsx
+  16:20  warning  'isAuthenticated' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  16:37  warning  'user' is assigned a value but never used             @typescript-eslint/no-unused-vars
+
+D:\agent\frontend\src\app\(dashboard)\page.tsx
+  16:17  warning  'isAuthenticated' is assigned a value but never used             @typescript-eslint/no-unused-vars
+  63:47  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  63:56  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+D:\agent\frontend\src\app\Navbar.tsx
+   6:11  error    An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+  10:10  warning  'active' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  10:18  warning  'setActive' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+
+D:\agent\frontend\src\app\status\page.tsx
+  23:14  warning  'err' is defined but never used                                                                                     @typescript-eslint/no-unused-vars
+  31:6   warning  React Hook useEffect has a missing dependency: 'checkConnection'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\agent\frontend\src\components\ChatWindow.tsx
+    6:3   warning  'Send' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+   41:6   warning  React Hook useEffect has a missing dependency: 'loadingMessages.length'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   99:25  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  106:19  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+
+D:\agent\frontend\src\components\LogoutHandler.tsx
+   8:16  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:16  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  19:27  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:16  warning  'e' is defined but never used             @typescript-eslint/no-unused-vars
+
+D:\agent\frontend\src\components\Register.tsx
+   59:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  141:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\agent\frontend\src\components\Sidebar.tsx
+   2:17  warning  'useState' is defined but never used    @typescript-eslint/no-unused-vars
+  11:3   warning  'LayoutGrid' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\agent\frontend\src\components\UserMenu.tsx
+  29:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\agent\frontend\src\components\layout\Header.tsx
+  4:10  warning  'Sparkles' is defined but never used                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+  5:10  warning  'cn' is defined but never used                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  6:8   warning  'Link' is defined but never used                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  9:11  error    An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+
+D:\agent\frontend\src\components\layout\Sidebar.tsx
+  44:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\agent\frontend\src\components\login-form.tsx
+    8:3   warning  'FieldDescription' is defined but never used                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   49:16  warning  'e' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  105:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\agent\frontend\src\context\AuthContext.tsx
+  10:9   error    Unexpected any. Specify a different type                                                        @typescript-eslint/no-explicit-any
+  18:36  error    Unexpected any. Specify a different type                                                        @typescript-eslint/no-explicit-any
+  29:14  warning  'err' is defined but never used                                                                 @typescript-eslint/no-unused-vars
+  29:19  error    Unexpected any. Specify a different type                                                        @typescript-eslint/no-explicit-any
+  39:5   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+D:\agent\frontend\src\hooks\useUser.ts
+  7:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\agent\frontend\src\lib\useApi.ts
+   7:34   error    Unexpected any. Specify a different type                        @typescript-eslint/no-explicit-any
+   7:61   error    Unexpected any. Specify a different type                        @typescript-eslint/no-explicit-any
+  14:75   error    Unexpected any. Specify a different type                        @typescript-eslint/no-explicit-any
+  14:136  warning  'e' is defined but never used                                   @typescript-eslint/no-unused-vars
+  20:35   error    Unexpected any. Specify a different type                        @typescript-eslint/no-explicit-any
+  20:60   error    Unexpected any. Specify a different type                        @typescript-eslint/no-explicit-any
+  26:75   error    Unexpected any. Specify a different type                        @typescript-eslint/no-explicit-any
+  26:136  warning  'e' is defined but never used                                   @typescript-eslint/no-unused-vars
+  32:1    warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+Γ£û 68 problems (32 errors, 36 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+
+node.exe : npm error Lifecycle 
+script `lint` failed with error:
+At C:\Program 
+Files\nodejs\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (npm error Lif  
+  ec...led with error::String   
+ ) [], RemoteException
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+npm error code 1
+npm error path D:\agent\frontend
+npm error workspace 
+agent-frontend@0.1.0
+npm error location 
+D:\agent\frontend
+npm error command failed
+npm error command 
+C:\Windows\system32\cmd.exe /d 
+/s /c eslint

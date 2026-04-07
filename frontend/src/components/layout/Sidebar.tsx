@@ -75,7 +75,7 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
       {/* Action: New Chat */}
       <div className="px-4 mb-6 shrink-0">
         <Link href="/chats" className={cn(
-          "w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-all shadow-md active:scale-95",
+          "btn-primary w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-all shadow-md active:scale-95",
           !isOpen && "justify-center px-0 shrink-0"
         )}>
           <Plus size={20} />

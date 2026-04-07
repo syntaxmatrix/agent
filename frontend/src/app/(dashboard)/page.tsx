@@ -1,45 +1,20 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { useRouter } from "next/navigation";
+import React from "react"
 import Image from "next/image"
 import {
   Sparkles,
   Plus,
   Users,
   Calendar,
-  BrainCircuit,
-  Image as ImageIcon,
-  Search,
-  Music,
   ArrowUpRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 
 export default function DashboardPage() {
-  const [isScrolled, setIsScrolled] = useState(false)
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const userName = user?.name || "Agentic AI";
-
-  useEffect(() => {
-    const handleScroll = (e: any) => {
-      const scrollY = e.target.scrollTop || window.scrollY
-      setIsScrolled(scrollY > 150)
-    }
-
-    // Listen to the main scroll container in the layout
-    const mainContent = document.querySelector('main')
-    if (mainContent) {
-      mainContent.addEventListener('scroll', handleScroll)
-    }
-    window.addEventListener('scroll', handleScroll)
-
-    return () => {
-      if (mainContent) mainContent.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [])
 
   const features = [
     {
@@ -65,40 +40,28 @@ export default function DashboardPage() {
     }
   ]
 
-  const actions = [
-    { name: "Deep Research", icon: BrainCircuit },
-    { name: "Make an Image", icon: ImageIcon },
-    { name: "Search", icon: Search },
-    { name: "Create Music", icon: Music }
-  ]
-
-  const shouldFloat = !isAuthenticated && isScrolled
-
   return (
     <div className="flex flex-col gap-12 pt-4 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Hero Section */}
-      <section className="relative w-full rounded-[2.5rem] bg-gradient-to-br from-slate-50 to-white border border-white/50 human-shadow p-8 md:p-14 overflow-hidden group">
+      <section className="relative w-full rounded-[2.5rem] bg-gradient-to-br from-slate-50 to-white border border-white/50 human-shadow overflow-hidden group hero-section">
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-          <div className="flex-1 space-y-8 max-w-xl text-center md:text-left">
+          <div className="flex-1 space-y-8 text-center md:text-left hero-content">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200/50 text-[11px] font-bold text-slate-500 uppercase tracking-widest shadow-sm">
               <Sparkles size={12} className="text-slate-400" />
               Intelligence v2.6
             </div>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-slate-800 leading-[1.05] tracking-tight">
+            <h1 className="hero-title fade-in delay-100">
               Hi {userName}, <br />
-              <span className="text-slate-400">Ready to Achieve Great Things?</span>
+              <span className="hero-subtitle">Ready to Achieve Great Things?</span>
             </h1>
-            <p className="text-lg text-slate-500 leading-relaxed font-medium">
+            <p className="hero-desc fade-in delay-200">
               Explore your personalized workspace where creativity meets productivity. Your AI assistant is ready to help you build the future.
             </p>
 
-            {/* Static Search Bar Position (Hidden when floating) */}
-              <div className={cn(
-              "transition-all duration-500 ease-in-out w-full max-w-2xl mx-auto md:mx-0",
-              shouldFloat ? "opacity-0 pointer-events-none scale-95" : "opacity-100"
-            )}>
-              <InputBar actions={actions} />
-            </div>
+            {/* Instructional Text */}
+            <p className="info-text fade-in delay-300">
+              To send email or chat, click on &quot;New Chat&quot;
+            </p>
           </div>
 
           <div className="relative flex-1 flex justify-center lg:justify-end">
@@ -107,7 +70,7 @@ export default function DashboardPage() {
                 src="/robot.png"
                 alt="Friendly AI Robot"
                 fill
-                className="object-contain"
+                className="object-contain hero-image"
                 priority
               />
 
@@ -159,15 +122,70 @@ export default function DashboardPage() {
         ))}
       </section>
 
-      {/* Floating Search Bar (Visible only when shouldFloat is true) */}
-      <div className={cn(
-        "fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl px-6 z-[60] transition-all duration-500 ease-in-out",
-        shouldFloat ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
-      )}>
-        <InputBar actions={actions} />
-      </div>
-
       <style jsx global>{`
+        * {
+          transition: all 0.2s ease-in-out;
+        }
+        .hero-section {
+          padding: 40px 60px;
+        }
+        .hero-content {
+          max-width: 700px;
+        }
+        .hero-title {
+          font-size: 48px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+        .hero-subtitle {
+          font-size: 48px;
+          font-weight: 700;
+          color: #64748b;
+        }
+        .hero-desc {
+          font-size: 18px;
+          color: #475569;
+          line-height: 1.6;
+        }
+        .info-text {
+          margin-top: 20px;
+          font-size: 18px;
+          font-weight: 500;
+          color: #1f2937;
+          text-align: center;
+          line-height: 1.6;
+        }
+        .info-text:hover {
+          color: #0f172a;
+        }
+        .hero-image {
+          border-radius: 16px;
+          transition: transform 0.3s ease;
+        }
+        .hero-image:hover {
+          transform: scale(1.02);
+        }
+        .btn-primary:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .fade-in {
+          animation: fadeIn 0.6s ease-in-out forwards;
+          opacity: 0;
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
         @keyframes float {
           0%, 100% { transform: translateY(0) rotate(0deg); }
           50% { transform: translateY(-15px) rotate(1deg); }
@@ -183,53 +201,6 @@ export default function DashboardPage() {
           animation: bounce-slow 5s ease-in-out infinite;
         }
       `}</style>
-    </div>
-  )
-}
-
-function InputBar({ actions }: { actions: any[] }) {
-  const [text, setText] = useState("");
-  const router = useRouter();
-
-  const handleSend = () => {
-    const q = text.trim();
-    if (!q) return;
-    router.push(`/chats?q=${encodeURIComponent(q)}`);
-    setText("");
-  };
-
-  return (
-    <div className="glass rounded-[2rem] border border-white/60 human-shadow p-3 ring-8 ring-slate-900/5 shadow-2xl">
-      <div className="flex flex-col gap-3">
-        <div className="relative">
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            type="text"
-            placeholder="Example: Explain quantum computing in simple terms"
-            className="w-full bg-transparent px-6 py-5 text-base focus:outline-none placeholder:text-slate-300 font-medium pr-16"
-          />
-          <button
-            onClick={handleSend}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-4 bg-slate-900 text-white rounded-2xl shadow-lg hover:bg-slate-800 active:scale-95 transition-all"
-            aria-label="Send message"
-          >
-            <ArrowUpRight size={24} />
-          </button>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5 px-4 pb-1">
-          {actions.map((btn, idx) => (
-            <button
-              key={idx}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white border border-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-50 hover:border-slate-200 transition-all shadow-sm active:scale-95"
-            >
-              <btn.icon size={14} className="text-slate-400 group-hover:text-slate-600" />
-              {btn.name}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   )
 }
