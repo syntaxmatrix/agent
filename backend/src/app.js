@@ -61,10 +61,12 @@ app.use(
 //routes import
 import userRouter from "./routes/user.routes.js";
 import agentRouter from "./routes/agent.routes.js"
+import historyRouter from "./routes/history.routes.js"
 
 //routes declarations
 app.use("/api/v1/user", userRouter); // example.com/api/v1/user/register
 app.use("/api/v1/agent", agentRouter); // example.com/api/v1/agent/test
+app.use("/api/history", historyRouter); // Use the exact path requested by user
 
 // Global Error Handler
 app.use((err, req, res, next) => {

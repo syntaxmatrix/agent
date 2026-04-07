@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "@/lib/axios";
 import { 
-  Send, 
   Bot, 
   User, 
   Sparkles, 
@@ -13,11 +12,14 @@ import {
   ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
-export default function ChatWindow({ initialQuery }: { initialQuery?: string }) {
+export default function ChatWindow({ initialQuery, conversationId }: { initialQuery?: string, conversationId?: string }) {
+  const router = useRouter();
   const [messages, setMessages] = useState<Array<{ from: "user" | "agent"; text: React.ReactNode | string }>>(
     initialQuery ? [{ from: "user", text: initialQuery }] : []
   );
+  const [convId, setConvId] = useState(conversationId || crypto.randomUUID());
   const [input, setInput] = useState(initialQuery ?? "");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -47,9 +49,47 @@ export default function ChatWindow({ initialQuery }: { initialQuery?: string }) 
     }
   }, [messages]);
 
+  // Fetch specific conversation if conversationId changes
+  useEffect(() => {
+    if (conversationId) {
+      setConvId(conversationId);
+      const fetchHistory = async () => {
+        try {
+          const res = await axios.get(`http://localhost:8000/api/history/${conversationId}`, {
+            withCredentials: true
+          });
+          if (res.data?.ok && res.data.messages) {
+            setMessages(res.data.messages.map((m: any) => ({
+              from: m.role === "ai" ? "agent" : "user",
+              text: m.content
+            })));
+          }
+        } catch (err) {
+          console.warn("Failed to load chat history", err);
+        }
+      };
+      fetchHistory();
+    } else {
+      // New conversation
+      setConvId(crypto.randomUUID());
+      setMessages(initialQuery ? [{ from: "user", text: initialQuery }] : []);
+      setInput(initialQuery ?? "");
+    }
+  }, [conversationId, initialQuery]);
+
+  useEffect(() => {
+    const handleForceReset = () => {
+      setConvId(crypto.randomUUID());
+      setMessages([]);
+      setInput("");
+    };
+    window.addEventListener("resetChatWindow", handleForceReset);
+    return () => window.removeEventListener("resetChatWindow", handleForceReset);
+  }, []);
+
   // Handle initial query after mount
   useEffect(() => {
-    if (initialQuery) {
+    if (initialQuery && !conversationId) {
       send();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,7 +109,7 @@ export default function ChatWindow({ initialQuery }: { initialQuery?: string }) 
 
     try {
       const res = await axios.get("http://localhost:8000/api/v1/agent/chats", { 
-        params: { q },
+        params: { q, conversationId: convId },
         withCredentials: true 
       });
       let ans = res.data?.ans ?? res.data?.text ?? "I'm sorry, I couldn't process that.";
@@ -103,11 +143,19 @@ export default function ChatWindow({ initialQuery }: { initialQuery?: string }) 
       }
 
       setMessages((s) => [...s, { from: "agent", text: ans }]);
+
+      // Update URL to stay in this conversation context
+      if (!conversationId) {
+        router.replace(`/chats?conversationId=${convId}`);
+      }
+
     } catch (err: any) {
-      const msg = err?.response?.data?.message ?? "Connection interrupted";
-      setMessages((s) => [...s, { from: "agent", text: `Protocol Error: ${msg}` }]);
+      const msg = err?.response?.data?.message || err?.response?.data?.error || err.message || "Connection interrupted";
+      setMessages((s) => [...s, { from: "agent", text: msg }]);
     } finally {
       setLoading(false);
+      // Notify sidebar to refresh history even if AI failed
+      window.dispatchEvent(new Event("chatUpdated"));
     }
   };
 
