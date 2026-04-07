@@ -7,7 +7,8 @@ import {
   MessageSquare,
   Sparkles,
   LogOut,
-  User
+  User,
+  MoreHorizontal
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -28,6 +29,28 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
   const currentConversationId = searchParams?.get("conversationId");
 
   const [recentHistory, setRecentHistory] = useState<any[]>([]);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = () => setOpenMenuId(null);
+    if (openMenuId) {
+      document.addEventListener("click", handleOutsideClick);
+    }
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, [openMenuId]);
+
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const deletedIds = JSON.parse(localStorage.getItem("deletedIds") || "[]");
+    if (!deletedIds.includes(id)) {
+      deletedIds.push(id);
+      localStorage.setItem("deletedIds", JSON.stringify(deletedIds));
+    }
+    
+    setRecentHistory((prev) => prev.filter((item) => item._id !== id));
+    setOpenMenuId(null);
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -37,7 +60,11 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
             withCredentials: true
           });
           if (res.data?.ok) {
-            setRecentHistory(res.data.history);
+            const deletedIds = JSON.parse(localStorage.getItem("deletedIds") || "[]");
+            const filteredData = res.data.history.filter(
+              (item: any) => !deletedIds.includes(item._id)
+            );
+            setRecentHistory(filteredData);
           }
         } catch (err) {
           console.warn("Failed to load history", err);
@@ -112,21 +139,49 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
               {recentHistory.map((chat: any, idx) => {
                 const isActive = currentConversationId === chat._id;
                 return (
-                  <button
+                  <div
                     key={chat._id || idx}
-                    onClick={() => {
-                      router.push(`/chats?conversationId=${chat._id}`);
-                    }}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left group",
+                      "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all text-left group relative",
                       isActive 
                         ? "bg-slate-100 text-slate-900 font-semibold shadow-sm border border-slate-200/50" 
                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
                     )}
                   >
-                    <MessageSquare size={16} className={cn("shrink-0", isActive ? "text-slate-900" : "text-slate-300 group-hover:text-slate-400")} />
-                    <span className="truncate">{typeof chat.latestMessage === "string" ? chat.latestMessage : "New Chat"}</span>
-                  </button>
+                    <div
+                      onClick={() => {
+                        router.push(`/chats?conversationId=${chat._id}`);
+                      }}
+                      className="flex-1 flex items-center gap-3 overflow-hidden cursor-pointer"
+                    >
+                      <MessageSquare size={16} className={cn("shrink-0", isActive ? "text-slate-900" : "text-slate-300 group-hover:text-slate-400")} />
+                      <span className="truncate">{typeof chat.latestMessage === "string" ? chat.latestMessage : "New Chat"}</span>
+                    </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuId(openMenuId === chat._id ? null : chat._id);
+                      }}
+                      className={cn(
+                        "p-1 rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-opacity shrink-0 ml-2",
+                        openMenuId === chat._id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      )}
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
+
+                    {openMenuId === chat._id && (
+                      <div className="absolute right-0 top-10 min-w-28 bg-white border border-slate-200 shadow-md rounded-lg py-1 z-[60] text-slate-700">
+                        <button
+                          onClick={(e) => handleDelete(chat._id, e)}
+                          className="w-full text-left px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
