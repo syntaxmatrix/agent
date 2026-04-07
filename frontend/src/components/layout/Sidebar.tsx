@@ -101,7 +101,7 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
         )}>
           <Plus size={20} />
           {isOpen && <span>New Chat</span>}
-        </button>
+        </Link>
       </div>
 
       {/* Navigation */}
