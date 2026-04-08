@@ -43,7 +43,13 @@ User query: "${query}"
     },
   });
 
-  return JSON.parse(response.text());
+  const text = extractText(response);
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.error('Failed to parse JSON from Gemini response in routeQuery:', err, text);
+    throw err;
+  }
 }
 
 async function chatQuery(query) {
@@ -70,7 +76,13 @@ User query: "${query}"
     },
   });
 
-  return JSON.parse(response.text());
+  const text = extractText(response);
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.error('Failed to parse JSON from Gemini response in chatQuery:', err, text);
+    throw err;
+  }
 }
 
 async function draftMail(query) {
@@ -105,7 +117,55 @@ User request: "${query}"
     },
   });
 
-  return JSON.parse(response.text());
+  const text = extractText(response);
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.error('Failed to parse JSON from Gemini response in draftMail:', err, text);
+    throw err;
+  }
+}
+
+function extractText(response) {
+  if (!response) return '';
+  // If SDK already returned a string
+  if (typeof response === 'string') return response;
+  // Common direct fields
+  if (typeof response.text === 'string') return response.text;
+  if (typeof response.outputText === 'string') return response.outputText;
+  if (typeof response.output === 'string') return response.output;
+
+  // Candidates array (common shape)
+  if (Array.isArray(response.candidates) && response.candidates.length) {
+    const c = response.candidates[0];
+    if (typeof c.text === 'string') return c.text;
+    if (typeof c.content === 'string') return c.content;
+    if (Array.isArray(c.content)) {
+      for (const item of c.content) {
+        if (typeof item.text === 'string') return item.text;
+      }
+    }
+  }
+
+  // Output array with content items
+  if (Array.isArray(response.output) && response.output.length) {
+    for (const out of response.output) {
+      if (typeof out.content === 'string') return out.content;
+      if (Array.isArray(out.content)) {
+        for (const item of out.content) {
+          if (typeof item.text === 'string') return item.text;
+        }
+      }
+    }
+  }
+
+  // output[0].content[0].text style
+  try {
+    if (response.output?.[0]?.content?.[0]?.text) return response.output[0].content[0].text;
+  } catch (e) {}
+
+  // As a last resort, stringify the whole response so the caller can inspect it
+  return JSON.stringify(response);
 }
 
 

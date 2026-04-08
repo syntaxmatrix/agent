@@ -16,6 +16,17 @@ import { useRouter } from "next/navigation";
 
 export default function ChatWindow({ initialQuery, conversationId }: { initialQuery?: string, conversationId?: string }) {
   const router = useRouter();
+  function normalizeContent(content: any): React.ReactNode {
+    if (React.isValidElement(content)) return content;
+    if (typeof content === 'string') return content;
+    if (content === null || content === undefined) return '';
+    if (typeof content === 'object') {
+      if (typeof content.body === 'string') return content.body;
+      if (typeof content.text === 'string') return content.text;
+      return JSON.stringify(content, null, 2);
+    }
+    return String(content);
+  }
   const [messages, setMessages] = useState<Array<{ from: "user" | "agent"; text: React.ReactNode | string }>>(
     initialQuery ? [{ from: "user", text: initialQuery }] : []
   );
@@ -61,7 +72,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
           if (res.data?.ok && res.data.messages) {
             setMessages(res.data.messages.map((m: any) => ({
               from: m.role === "ai" ? "agent" : "user",
-              text: m.content
+              text: normalizeContent(m.content)
             })));
           }
         } catch (err) {
@@ -112,13 +123,24 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
         params: { q, conversationId: convId },
         withCredentials: true 
       });
-      let ans = res.data?.ans ?? res.data?.text ?? "I'm sorry, I couldn't process that.";
-      
-      // Handle Email Draft Structure
-      if (typeof ans === 'object' && ans !== null) {
-        if (ans.subject !== undefined && ans.to !== undefined && ans.body) {
+      let ans: any = res.data?.ans ?? res.data?.text ?? "I'm sorry, I couldn't process that.";
+
+      // Handle Email responses
+      if (ans && typeof ans === 'object') {
+        // Sent confirmation from Gmail API (has labelIds with SENT)
+        if (Array.isArray(ans.labelIds) && ans.labelIds.includes('SENT')) {
+          const sentText = (
+            <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-3 shadow-sm w-full flex items-center justify-between">
+                <div className="text-sm text-green-800 font-medium">Email sent to recipient.</div>
+                <div className="text-xs text-green-700 opacity-80">Sent</div>
+              </div>
+            </div>
+          );
+          setMessages((s) => [...s, { from: "agent", text: sentText }]);
+        } else if (ans.subject !== undefined && ans.to !== undefined && ans.body) {
           // Format as an email draft visualization
-          ans = (
+          const jsx = (
             <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm w-full">
                 <div className="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
@@ -130,19 +152,18 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
                   <p><strong className="text-slate-700">Subject:</strong> {ans.subject}</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border border-slate-100 text-sm text-slate-700 whitespace-pre-wrap font-medium">
-                  {ans.body}
+                  {normalizeContent(ans.body)}
                 </div>
               </div>
             </div>
           );
+          setMessages((s) => [...s, { from: "agent", text: jsx }]);
         } else {
-          ans = (ans as any).body || JSON.stringify(ans, null, 2);
+          setMessages((s) => [...s, { from: "agent", text: normalizeContent(ans) }]);
         }
       } else {
-        ans = String(ans);
+        setMessages((s) => [...s, { from: "agent", text: String(ans) }]);
       }
-
-      setMessages((s) => [...s, { from: "agent", text: ans }]);
 
       // Update URL to stay in this conversation context
       if (!conversationId) {
