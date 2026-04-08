@@ -1,6 +1,7 @@
 import { GalleryVerticalEnd, Link } from "lucide-react"
 
 import { LoginForm } from "@/components/login-form"
+import { ProductName } from "@/constant"
 
 export default function LoginPage() {
   return (
@@ -11,7 +12,7 @@ export default function LoginPage() {
             <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <GalleryVerticalEnd className="size-4" />
             </div>
-            Agentic AI.
+            {ProductName}.
           </Link>
         </div>
         <LoginForm />

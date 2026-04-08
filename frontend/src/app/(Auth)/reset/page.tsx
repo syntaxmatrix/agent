@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { PasswordResetSchema, VerifyCodeSchema } from "@/schemas/auth";
+import { ProductName } from "@/constant"
 
 type ResetCookie = {
   email?: string;
@@ -209,7 +210,7 @@ export default function ResetPage() {
             <div className="flex size-8 items-center justify-center rounded-xl bg-slate-900 text-white shadow-lg">
               <GalleryVerticalEnd size={20} />
             </div>
-            Agentic AI.
+            {ProductName}.
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">

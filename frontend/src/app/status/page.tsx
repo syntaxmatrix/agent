@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, XCircle, Loader2, Server, Database, Globe, ArrowRight } from "lucide-react";
+import { ProductName , Version } from "@/constant"
 
 export default function StatusPage() {
   const [backendStatus, setBackendStatus] = useState<"pending" | "success" | "error">("pending");
@@ -120,7 +121,7 @@ export default function StatusPage() {
       </div>
       
       <p className="mt-8 text-slate-500 text-xs tracking-widest uppercase">
-        Syntax Matrix • Agentic AI v2.6
+        Syntax Matrix • {ProductName} {Version}
       </p>
     </div>
   );

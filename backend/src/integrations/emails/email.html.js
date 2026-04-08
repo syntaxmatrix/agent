@@ -1,3 +1,5 @@
+import {ProductName} from "../../constant.js"
+
 const generateVerificationEmailHTML = (name, verifyCode) => {
   return `
 <!DOCTYPE html>
@@ -17,7 +19,7 @@ const generateVerificationEmailHTML = (name, verifyCode) => {
           <!-- header -->
           <tr>
             <td style="background: linear-gradient(90deg, #3D5A80 0%, #2f4763 100%); padding:20px 24px; text-align:left;">
-              <h1 style="margin:0; color:#fff; font-size:20px; letter-spacing:0.2px; text-align: center;">Agent</h1>
+              <h1 style="margin:0; color:#fff; font-size:20px; letter-spacing:0.2px; text-align: center;">${ProductName}</h1>
             </td>
           </tr>
 
@@ -45,7 +47,7 @@ const generateVerificationEmailHTML = (name, verifyCode) => {
           </tr>
           <tr>
             <td style="background:#fafafa; padding:16px 24px; font-size:12px; color:#888; text-align:center;">
-              <div style="margin-bottom:6px;">Agent  — keeping your account safe</div>
+              <div style="margin-bottom:6px;">${ProductName}  — keeping your account safe</div>
               <div>If you did not request this, you can safely ignore this message.</div>
             </td>
           </tr>
@@ -65,7 +67,7 @@ const generateWelcomeEmailHTML = (name) => {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Welcome to Agent</title>
+  <title>Welcome to ${ProductName}</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f4f4; padding:24px 0;">
@@ -75,7 +77,7 @@ const generateWelcomeEmailHTML = (name) => {
           
           <tr>
             <td style="background: linear-gradient(90deg, #2A9D8F 0%, #264653 100%); padding:30px 24px; text-align:center;">
-              <h1 style="margin:0; color:#fff; font-size:24px; letter-spacing:1px;">Welcome to Agent!</h1>
+              <h1 style="margin:0; color:#fff; font-size:24px; letter-spacing:1px;">Welcome to ${ProductName}!</h1>
               <p style="margin:10px 0 0 0; color:#e9edc9; font-size:14px; text-transform: uppercase; font-weight: bold;">Registration Successful</p>
             </td>
           </tr>
@@ -109,8 +111,8 @@ const generateWelcomeEmailHTML = (name) => {
 
           <tr>
             <td style="background:#fafafa; padding:20px 24px; font-size:12px; color:#888; text-align:center; border-top:1px solid #eeeeee;">
-              <div style="margin-bottom:8px;"><strong>Agent</strong> — Automating the Future</div>
-              <div>You are receiving this because you signed up for the Agent Beta program.</div>
+              <div style="margin-bottom:8px;"><strong>${ProductName}</strong> — Automating the Future</div>
+              <div>You are receiving this because you signed up for the ${ProductName} Beta program.</div>
               <div style="margin-top:10px;">
                 <a href="#" style="color:#2A9D8F; text-decoration:none;">Unsubscribe</a> • <a href="#" style="color:#2A9D8F; text-decoration:none;">Privacy Policy</a>
               </div>
@@ -169,14 +171,14 @@ const generateSecurityEmailHTML = (name, securityCode) => {
               </p>
 
               <p style="margin:0; font-size:14px; color:#666;">
-                Stay safe, <br>Agentic AI
+                Stay safe, <br>${ProductName}
               </p>
             </td>
           </tr>
 
           <tr>
             <td style="background:#fafafa; padding:16px 24px; font-size:12px; color:#888; text-align:center;">
-              <div style="margin-bottom:6px;"><strong>Agent</strong> — Automation and AI</div>
+              <div style="margin-bottom:6px;"><strong>${ProductName}</strong> — Automation and AI</div>
               <div>This is an automated notification regarding your account security.</div>
             </td>
           </tr>

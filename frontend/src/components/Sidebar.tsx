@@ -10,6 +10,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import Link from "next/link";
+import { ProductName } from "@/constant";
 
 interface SidebarProps {
   history: string[];
@@ -31,7 +32,7 @@ export default function Sidebar({ history, isCollapsed, setIsCollapsed, isOpen }
         {!isCollapsed && (
           <Link href="/" className="flex items-center gap-2 text-white font-bold tracking-tight truncate">
             <Zap className="fill-indigo-500 text-indigo-500" size={17} />
-            <span className="text-sm">Agentic AI</span>
+            <span className="text-sm">{ProductName}</span>
           </Link>
         )}
         {isCollapsed && (
@@ -113,8 +114,8 @@ export default function Sidebar({ history, isCollapsed, setIsCollapsed, isOpen }
            </div>
            {!isCollapsed && (
              <div className="flex-1 truncate">
-               <p className="text-xs font-bold text-white">John Doe</p>
-               <p className="text-[10px] text-slate-500 truncate">john@agentic.ai</p>
+               <p className="text-xs font-bold text-white">Syntax Matrix</p>
+               <p className="text-[10px] text-slate-500 truncate">abc@example.com</p>
              </div>
            )}
            {!isCollapsed && <MoreHorizontal size={14} className="text-slate-600" />}

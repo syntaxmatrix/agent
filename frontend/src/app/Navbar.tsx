@@ -1,6 +1,7 @@
 "use client";
 import { Zap } from "lucide-react";
 import Link from "next/link";
+import { ProductName } from "@/constant"
 
 export default function Navbar() {
 
@@ -13,7 +14,7 @@ export default function Navbar() {
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-sm">
               <Zap className="fill-white text-white" size={14} />
             </div>
-            <span className="hidden sm:inline-block">Agentic AI</span>
+            <span className="hidden sm:inline-block">{ProductName}</span>
           </Link>
         </div>
 

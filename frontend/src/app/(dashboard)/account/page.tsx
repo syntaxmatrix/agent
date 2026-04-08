@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { ProductName } from "@/constant"
+
 
 export default function AccountPage() {
   const [loading, setLoading] = useState(false);
@@ -197,7 +199,7 @@ export default function AccountPage() {
               <Globe size={20} className="text-indigo-600" />
               Connected Apps
             </h2>
-            <p className="text-sm text-slate-500">Sync your external services with Agentic AI.</p>
+            <p className="text-sm text-slate-500">Sync your external services with {ProductName}.</p>
           </div>
 
           <div className="space-y-4 pt-2">

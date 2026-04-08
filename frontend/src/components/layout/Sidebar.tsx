@@ -16,6 +16,7 @@ import axios from "@/lib/axios"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import Link from "next/link"
+import { ProductName } from "@/constant"
 
 interface SidebarProps {
   isOpen: boolean
@@ -130,7 +131,7 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
           <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-lg active:scale-95 transition-transform">
             <Sparkles size={20} />
           </div>
-          <span className="font-bold text-slate-800 text-lg tracking-tight">Agentic AI</span>
+          <span className="font-bold text-slate-800 text-lg tracking-tight">{ProductName}</span>
         </Link>
         <button 
           onClick={toggle}

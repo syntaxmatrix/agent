@@ -5,6 +5,7 @@ import {
   generateSecurityEmailHTML
 } from "./email.html.js";
 import { APIError } from "../../utils/APIError.js";
+import { emailnoreply ,ProductName} from "../../constant.js";
 
 const RESENDKEY = process.env.RESEND_API_KEY;
 
@@ -24,9 +25,9 @@ const sendVerificationEmail = async (email, name, verifyCode) => {
 
   try {
     const result = await resend.emails.send({
-      from: "Agent <noreply.agent@retube.live>",
+      from: `${ProductName} <${emailnoreply}>`,
       to: [email],
-      subject: "Agent | Verification Code",
+      subject: `${ProductName} | Verification Code`,
       html: emailHTML,
     });
 
@@ -45,9 +46,9 @@ const sendSecurityCodeMail = async (email, name, verifyCode) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Agent <noreply.agent@retube.live>",
+      from: `${ProductName} <${emailnoreply}>`,
       to: [email],
-      subject: "Agent | Security Code",
+      subject: `${ProductName} | Security Code`,
       html: emailHTML,
     });
 
@@ -68,9 +69,9 @@ const sendWelcomeEmail = async (email, name) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Agent <noreply.agent@retube.live>",
+      from: `${ProductName} <${emailnoreply}>`,
       to: [email],
-      subject: "Agent | Successful Registration",
+      subject: `${ProductName} | Successful Registration`,
       html: emailHTML,
     });
 

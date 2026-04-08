@@ -2,6 +2,7 @@
 
 import React from "react"
 import UserMenu from "@/components/UserMenu"
+import { Version } from "@/constant"
 
 export default function Header() {
   return (
@@ -9,7 +10,7 @@ export default function Header() {
       {/* Left Section */}
       <div className="flex items-center gap-5">
         <div className="flex items-center gap-2.5">
-          <span className="font-display font-bold text-slate-800 tracking-tight text-lg">Assistant v0.2</span>
+          <span className="font-display font-bold text-slate-800 tracking-tight text-lg">Assistant {Version}</span>
           <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-slate-200/50">Beta</span>
         </div>
       </div>

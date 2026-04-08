@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { ProductName } from "@/constant";
 
 type Role = "user" | "agent";
 
@@ -235,7 +236,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
             <div className="space-y-2">
               <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Intelligence Ready</h3>
               <p className="text-slate-500 font-medium max-w-[200px] mx-auto leading-relaxed">
-                Start a conversation to see Agentic AI in action.
+                Start a conversation to see {ProductName} in action.
               </p>
             </div>
           </div>
@@ -294,7 +295,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}
               className="flex-1 bg-transparent px-2 py-4 text-sm font-semibold focus:outline-none placeholder:text-slate-300 text-slate-800 disabled:opacity-50"
-              placeholder="Message Agentic AI..."
+              placeholder={`Message ${ProductName}...`}
             />
             <div className="flex items-center gap-1.5 pr-2">
               <button type="button" className="p-3 text-slate-300 hover:text-slate-600 transition-colors hidden sm:block">

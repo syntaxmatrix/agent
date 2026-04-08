@@ -2,9 +2,10 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import LogoutHandler from "@/components/LogoutHandler";
 import { AuthProvider } from "@/context/AuthContext";
+import { ProductName, Version } from "@/constant"
 
 export const metadata = {
-  title: "Agentic AI - Assistant v0.2",
+  title: `${ProductName} - Assistant ${Version}`,
   description: "Modern SaaS AI assistant for achieving great things.",
 };
 

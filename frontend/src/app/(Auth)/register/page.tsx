@@ -1,5 +1,6 @@
 
 import { RegisterForm } from "@/components/Register"
+import { ProductName } from "@/constant"
 import { GalleryVerticalEnd, Link } from "lucide-react"
     
 
@@ -13,7 +14,7 @@ export default function RegisterPage() {
             <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <GalleryVerticalEnd className="size-4" />
             </div>
-            Agentic AI.
+            {ProductName}.
           </Link>
         </div>
         <RegisterForm />
