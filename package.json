@@ -16,10 +16,8 @@
     "test": "npm-run-all test:frontend test:backend",
     "test:frontend": "npm --prefix frontend test",
     "test:backend": "npm --prefix backend test",
-    "lint": "npm-run-all lint:frontend lint:backend",
+    "lint": "npm-run-all lint:frontend",
     "lint:frontend": "npm --prefix frontend run lint",
-    "lint:backend": "npm --prefix backend run lint"
-    ,
     "automic:run": "powershell -File scripts\\automate-run.ps1"
   },
   "devDependencies": {

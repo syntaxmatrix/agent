@@ -14,20 +14,53 @@ import {
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
+type Role = "user" | "agent";
+
+type ChatMessage = {
+  from: Role;
+  text: React.ReactNode | string;
+};
+
+type HistoryMessage = {
+  role?: string;
+  content?: unknown;
+};
+
+type HistoryResponse = {
+  ok?: boolean;
+  messages?: HistoryMessage[];
+};
+
+type AgentAnswer = {
+  labelIds?: string[];
+  subject?: string;
+  to?: string;
+  body?: unknown;
+  text?: string;
+};
+
+type AgentChatResponse = {
+  ans?: unknown;
+  text?: string;
+};
+
+const LOADING_MESSAGES = ["Generating...", "Working...", "Loading...", "Thinking..."];
+
 export default function ChatWindow({ initialQuery, conversationId }: { initialQuery?: string, conversationId?: string }) {
   const router = useRouter();
-  function normalizeContent(content: any): React.ReactNode {
+  function normalizeContent(content: unknown): React.ReactNode {
     if (React.isValidElement(content)) return content;
     if (typeof content === 'string') return content;
     if (content === null || content === undefined) return '';
     if (typeof content === 'object') {
-      if (typeof content.body === 'string') return content.body;
-      if (typeof content.text === 'string') return content.text;
+      const maybeContent = content as AgentAnswer;
+      if (typeof maybeContent.body === 'string') return maybeContent.body;
+      if (typeof maybeContent.text === 'string') return maybeContent.text;
       return JSON.stringify(content, null, 2);
     }
     return String(content);
   }
-  const [messages, setMessages] = useState<Array<{ from: "user" | "agent"; text: React.ReactNode | string }>>(
+  const [messages, setMessages] = useState<ChatMessage[]>(
     initialQuery ? [{ from: "user", text: initialQuery }] : []
   );
   const [convId, setConvId] = useState(conversationId || crypto.randomUUID());
@@ -35,19 +68,13 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const loadingMessages = [
-    "Generating...",
-    "Working...",
-    "Loading...",
-    "Thinking..."
-  ];
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
     if (!loading) return;
   
     const interval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+      setMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
     }, 1500);
   
     return () => clearInterval(interval);
@@ -66,11 +93,11 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
       setConvId(conversationId);
       const fetchHistory = async () => {
         try {
-          const res = await axios.get(`http://localhost:8000/api/history/${conversationId}`, {
+          const res = await axios.get<HistoryResponse>(`http://localhost:8000/api/v1/history/${conversationId}`, {
             withCredentials: true
           });
           if (res.data?.ok && res.data.messages) {
-            setMessages(res.data.messages.map((m: any) => ({
+            setMessages(res.data.messages.map((m) => ({
               from: m.role === "ai" ? "agent" : "user",
               text: normalizeContent(m.content)
             })));
@@ -119,16 +146,17 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
     setLoading(true);
 
     try {
-      const res = await axios.get("http://localhost:8000/api/v1/agent/chats", { 
+      const res = await axios.get<AgentChatResponse>("http://localhost:8000/api/v1/agent/chats", { 
         params: { q, conversationId: convId },
         withCredentials: true 
       });
-      let ans: any = res.data?.ans ?? res.data?.text ?? "I'm sorry, I couldn't process that.";
+      const ans: unknown = res.data?.ans ?? res.data?.text ?? "I'm sorry, I couldn't process that.";
 
       // Handle Email responses
       if (ans && typeof ans === 'object') {
+        const answer = ans as AgentAnswer;
         // Sent confirmation from Gmail API (has labelIds with SENT)
-        if (Array.isArray(ans.labelIds) && ans.labelIds.includes('SENT')) {
+        if (Array.isArray(answer.labelIds) && answer.labelIds.includes('SENT')) {
           const sentText = (
             <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="bg-green-50 border border-green-200 rounded-xl p-3 shadow-sm w-full flex items-center justify-between">
@@ -138,7 +166,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
             </div>
           );
           setMessages((s) => [...s, { from: "agent", text: sentText }]);
-        } else if (ans.subject !== undefined && ans.to !== undefined && ans.body) {
+        } else if (answer.subject !== undefined && answer.to !== undefined && answer.body) {
           // Format as an email draft visualization
           const jsx = (
             <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -148,18 +176,18 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
                   <p className="text-sm font-semibold text-slate-800">New Email</p>
                 </div>
                 <div className="text-xs text-slate-500 space-y-1.5 mb-3 select-all">
-                  <p><strong className="text-slate-700">To:</strong> {ans.to || "[Not Specified]"}</p>
-                  <p><strong className="text-slate-700">Subject:</strong> {ans.subject}</p>
+                  <p><strong className="text-slate-700">To:</strong> {answer.to || "[Not Specified]"}</p>
+                  <p><strong className="text-slate-700">Subject:</strong> {answer.subject}</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border border-slate-100 text-sm text-slate-700 whitespace-pre-wrap font-medium">
-                  {normalizeContent(ans.body)}
+                  {normalizeContent(answer.body)}
                 </div>
               </div>
             </div>
           );
           setMessages((s) => [...s, { from: "agent", text: jsx }]);
         } else {
-          setMessages((s) => [...s, { from: "agent", text: normalizeContent(ans) }]);
+          setMessages((s) => [...s, { from: "agent", text: normalizeContent(answer) }]);
         }
       } else {
         setMessages((s) => [...s, { from: "agent", text: String(ans) }]);
@@ -170,8 +198,20 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
         router.replace(`/chats?conversationId=${convId}`);
       }
 
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.response?.data?.error || err.message || "Connection interrupted";
+    } catch (err: unknown) {
+      const fallback = "Connection interrupted";
+      const responseData =
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: unknown } }).response?.data === "object"
+          ? (err as { response?: { data?: { message?: unknown; error?: unknown } } }).response?.data
+          : undefined;
+      const msg =
+        (typeof responseData?.message === "string" && responseData.message) ||
+        (typeof responseData?.error === "string" && responseData.error) ||
+        (err instanceof Error && err.message) ||
+        fallback;
       setMessages((s) => [...s, { from: "agent", text: msg }]);
     } finally {
       setLoading(false);
@@ -233,7 +273,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
             </div>
             <div className="max-w-[80%] px-6 py-4 rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm bg-white text-slate-800 rounded-tl-none border border-slate-100 flex items-center gap-3">
               <Loader2 size={16} className="animate-spin text-slate-400" />
-              <span className="text-slate-500 animate-pulse">{loadingMessages[messageIndex]}</span>
+              <span className="text-slate-500 animate-pulse">{LOADING_MESSAGES[messageIndex]}</span>
             </div>
           </div>
         )}

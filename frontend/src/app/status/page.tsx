@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, XCircle, Loader2, Server, Database, Globe, ArrowRight } from "lucide-react";
 
 export default function StatusPage() {
@@ -8,7 +8,7 @@ export default function StatusPage() {
   const [backendMessage, setBackendMessage] = useState<string>("");
   const [backendPort, setBackendPort] = useState<number>(8000);
 
-  const checkConnection = async () => {
+  const checkConnection = useCallback(async () => {
     setBackendStatus("pending");
     try {
       const response = await fetch(`http://localhost:${backendPort}/api/v1/hello`);
@@ -23,12 +23,13 @@ export default function StatusPage() {
     } catch (err) {
       setBackendStatus("error");
       setBackendMessage("Could not reach the backend server. Is it running?");
+      console.error("Connection check failed:", err);
     }
-  };
+  }, [backendPort]);
 
   useEffect(() => {
     checkConnection();
-  }, [backendPort]);
+  }, [checkConnection]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 font-sans">

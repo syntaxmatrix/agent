@@ -48,7 +48,7 @@ export default function DashboardPage() {
           <div className="flex-1 space-y-8 text-center md:text-left hero-content">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200/50 text-[11px] font-bold text-slate-500 uppercase tracking-widest shadow-sm">
               <Sparkles size={12} className="text-slate-400" />
-              Intelligence v2.6
+              Beta v0.2
             </div>
             <h1 className="hero-title fade-in delay-100">
               Hi {userName}, <br />

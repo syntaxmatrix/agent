@@ -8,6 +8,7 @@ import { GalleryVerticalEnd, Mail, ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 export default function ForgotPage() {
   const [email, setEmail] = useState("");
@@ -19,18 +20,27 @@ export default function ForgotPage() {
     if (!email) return toast.error("Email is required");
     setLoading(true);
     try {
-      // The backend /otp route is GET in user.routes, but let's try POST first as a courtesy
+      // The backend /otp route is GET in user.routes, but let's try POST first as a courtesy // Refactor Needs...
       try {
         await axios.post("/api/user/otp", { email });
       } catch (e) {
         await axios.get("/api/user/otp", { params: { email } });
+        console.warn("POST /otp failed, fallback to GET", e); 
       }
       toast.success("Verification Code Sent", {
         description: "Check your inbox for the security code."
       });
       router.push("/reset");
-    } catch (err: any) {
-      const msg = err?.response?.data?.message ?? err?.message ?? "Failed to send code";
+    } catch (err: unknown) {
+      const msg =
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : err instanceof Error
+            ? err.message
+            : "Failed to send code";
       toast.error("Operation Failed", {
         description: msg
       });
@@ -55,7 +65,7 @@ export default function ForgotPage() {
             <div className="space-y-2 text-center md:text-left">
               <h1 className="text-3xl font-bold tracking-tight">Forgot password?</h1>
               <p className="text-slate-500 font-medium">
-                No worries, we'll send you reset instructions.
+                No worries, we&apos;ll send you reset instructions.
               </p>
             </div>
 
@@ -97,10 +107,12 @@ export default function ForgotPage() {
         </div>
       </div>
       <div className="relative hidden bg-slate-100 lg:block overflow-hidden">
-        <img
+        <Image 
           src="/maths.jpg"
           alt="Abstract illustration"
           className="absolute inset-0 h-full w-full object-cover grayscale opacity-40 mix-blend-multiply"
+          width={800}
+          height={600}
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-slate-900/80 to-transparent flex items-end p-20">
           <div className="max-w-md">

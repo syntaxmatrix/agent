@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Mail, Lock } from "lucide-react"
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -20,6 +19,8 @@ import { AxiosError } from "axios";
 import { toast } from "sonner"
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
+import Link from "next/link";
 
 export function LoginForm({
   className,
@@ -47,7 +48,7 @@ export function LoginForm({
         // Refresh auth context so client knows user is authenticated
         await refresh();
       } catch (e) {
-        // ignore refresh errors; we'll still attempt navigation
+        console.warn("Failed to refresh auth context after login", e);
       }
       router.replace("/chats");
       setIsSubmitting(false)
@@ -68,9 +69,9 @@ export function LoginForm({
           <div className="flex flex-col text-left">
             <h1 className="text-2xl font-bold">Login to your account</h1>
           </div>
-          <a href="/register" className="text-sm font-medium text-primary hover:underline">
+          <Link href="/register" className="text-sm font-medium text-primary hover:underline">
             Sign Up
-          </a>
+          </Link>
         </div>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -82,12 +83,12 @@ export function LoginForm({
         <Field>
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Password</FieldLabel>
-            <a
+            <Link
               href="/forgot"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
-            </a>
+            </Link>
           </div>
           <div className="input-wrapper">
             <Lock className="input-icon" size={18} />
@@ -102,7 +103,7 @@ export function LoginForm({
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
           <Button variant="outline" type="button" onClick={() => window.location.href = "/api/user/google"}>
-            <img src="/google.png" alt="Google" className="mr-2 h-4 w-4" />
+            <Image src="/google.png" alt="Google" width={16} height={16} />
             Login with Google
           </Button>
         </Field>

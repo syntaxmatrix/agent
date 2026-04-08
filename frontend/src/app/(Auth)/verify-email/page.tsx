@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Sparkles, ShieldCheck, ArrowRight, Loader2 } from "lucide-react"
+import { Sparkles, ArrowRight, Loader2 } from "lucide-react"
 import axios from "@/lib/axios"
 import { toast } from "sonner"
 
@@ -33,13 +33,21 @@ export default function VerifyEmailPage() {
       })
 
       if (response.data.success) {
-        toast.success("Email verified successfully! You can now sign in.")
-        router.push("/signin")
+        toast.success("Email verified successfully! You can now Login.")
+        router.push("/login")
       } else {
         toast.error(response.data.message || "Verification failed")
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Invalid or expired code"
+    } catch (error: unknown) {
+      const errorMessage = 
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : error instanceof Error
+            ? error.message
+            : "Invalid or expired code"
       toast.error(errorMessage)
       console.error("Verification error:", error)
     } finally {
@@ -59,7 +67,7 @@ export default function VerifyEmailPage() {
           </div>
           <h1 className="text-3xl font-display font-bold text-slate-800 tracking-tight mb-2">Verify Email</h1>
           <p className="text-slate-500 font-medium whitespace-pre-wrap">
-            We've sent a 6-digit code to{"\n"}
+            We&apos;ve sent a 6-digit code to{"\n"}
             <span className="text-slate-900 font-bold">{email || "your email"}</span>
           </p>
         </div>
@@ -89,7 +97,7 @@ export default function VerifyEmailPage() {
           </form>
 
           <p className="mt-8 text-xs font-bold text-slate-400">
-            Didn't receive a code? <button className="text-slate-900 hover:underline">Resend</button>
+            Didn&apos;t receive a code? <button className="text-slate-900 hover:underline">Resend</button>
           </p>
         </div>
       </div>

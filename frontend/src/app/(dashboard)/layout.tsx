@@ -13,7 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const { loading, isAuthenticated, user } = useAuth();
+  const { loading } = useAuth(); 
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
 

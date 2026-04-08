@@ -3,12 +3,18 @@
 import { useEffect } from "react";
 import axios from "@/lib/axios";
 
+declare global {
+  interface Window {
+    logoutHandler?: () => Promise<void>;
+  }
+}
+
 export default function LogoutHandler() {
   useEffect(() => {
-    (window as any).logoutHandler = async () => {
+    window.logoutHandler = async () => {
       try {
         await axios.post('/api/user/logout');
-      } catch (err) {
+      } catch {
         // ignore
       }
       window.location.href = '/login';
@@ -16,8 +22,8 @@ export default function LogoutHandler() {
 
     return () => {
       try {
-        delete (window as any).logoutHandler;
-      } catch (e) {}
+        delete window.logoutHandler;
+      } catch {}
     };
   }, []);
 

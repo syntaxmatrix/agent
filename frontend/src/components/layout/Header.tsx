@@ -1,22 +1,16 @@
 "use client"
 
 import React from "react"
-import { Sparkles } from "lucide-react"
-import { cn } from "@/lib/utils"
-import Link from "next/link"
 import UserMenu from "@/components/UserMenu"
 
-interface HeaderProps {
-}
-
-export default function Header({ }: HeaderProps) {
+export default function Header() {
   return (
     <header className="h-20 flex items-center justify-between px-8 bg-transparent relative z-30">
       {/* Left Section */}
       <div className="flex items-center gap-5">
         <div className="flex items-center gap-2.5">
-          <span className="font-display font-bold text-slate-800 tracking-tight text-lg">Assistant v2.6</span>
-          <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-slate-200/50">PRO</span>
+          <span className="font-display font-bold text-slate-800 tracking-tight text-lg">Assistant v0.2</span>
+          <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-slate-200/50">Beta</span>
         </div>
       </div>
 

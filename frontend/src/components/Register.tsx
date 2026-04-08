@@ -25,6 +25,7 @@ import axios from "@/lib/axios";
 import { AxiosError } from "axios";
 import { toast } from "sonner"
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export function RegisterForm({
   className,
@@ -56,8 +57,16 @@ export function RegisterForm({
         toast.error("Email already registered. Try login instead.");
         return;
       }
-    } catch (err: any) {
-      const m = err?.response?.data?.message ?? err?.message ?? "Failed to validate email";
+    } catch (err: unknown) {
+      const m =
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { message?: unknown } } }).response?.data?.message === "string"
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : err instanceof Error
+            ? err.message
+            : "Failed to validate email";
       toast.error(m);
       return;
     }
@@ -138,7 +147,7 @@ export function RegisterForm({
           <>
             <Field>
               <Button variant="outline" type="button" onClick={() => window.location.href = "/api/user/google"}>
-                <img src="/google.png" alt="Google" className="mr-2 h-4 w-4" />
+                <Image src="/google.png" alt="Google" width={16} height={16} className="mr-2" />
                 Register with Google
               </Button>
             </Field>

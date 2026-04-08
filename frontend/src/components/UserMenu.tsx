@@ -26,8 +26,15 @@ export default function UserMenu() {
       await axios.post('/api/user/logout');
       toast.success('Logged out');
       router.push('/login');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? 'Logout failed');
+    } catch (err: unknown) {
+      toast.error(
+        typeof err === "object" &&
+          err !== null &&
+          "response" in err &&
+          typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : "Logout failed"
+      );
     }
   };
 

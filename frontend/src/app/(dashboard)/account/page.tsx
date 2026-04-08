@@ -13,10 +13,9 @@ import {
   Globe, 
   ArrowRight,
   ShieldAlert,
-  Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export default function AccountPage() {
   const [loading, setLoading] = useState(false);
@@ -33,12 +32,16 @@ export default function AccountPage() {
       toast.success("Verification Code Sent", {
         description: "Check your email for the 6-digit security code."
       });
-    } catch (err: any) {
-      if (err?.response?.status === 401) {
-        router.push("/login");
-        return;
-      }
-      const msg = err?.response?.data?.message ?? err?.message ?? "Failed to send code";
+    } catch (err: unknown) {
+      const msg = 
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : err instanceof Error
+            ? err.message
+            : "Failed to send code";
       toast.error("Operation Failed", { description: msg });
     } finally {
       setLoading(false);
@@ -62,7 +65,7 @@ export default function AccountPage() {
         setUsernameStatus("available");
       }
       setUsernameMessage(msg);
-    } catch (err: any) {
+    } catch {
       setUsernameStatus("error");
       setUsernameMessage("Failed to check availability");
     }
@@ -75,8 +78,17 @@ export default function AccountPage() {
       toast.success("Successfully Logged Out");
       await refresh();
       router.push("/login");
-    } catch (err: any) {
-      toast.error("Logout Failed");
+    } catch (err: unknown) {
+      const msg = 
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : err instanceof Error
+            ? err.message
+            : "Logout Failed";
+      toast.error("Logout Failed", { description: msg });
     } finally {
       setLoading(false);
     }
@@ -89,8 +101,14 @@ export default function AccountPage() {
       const encryptedEmail = res.data?.data?.email || res.data?.email;
       if (!encryptedEmail) throw new Error("Encrypted email not returned from backend");
       window.location.href = `/api/user/gmail?email=${encodeURIComponent(encryptedEmail)}`;
-    } catch (err: any) {
-      if (err?.response?.status === 401) {
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { status?: number } }).response?.status === "number" &&
+        (err as { response?: { status?: number } }).response?.status === 401
+      ) {
         router.push("/login");
         return;
       }
@@ -180,7 +198,7 @@ export default function AccountPage() {
             <div className="p-5 rounded-2xl bg-slate-50 border border-emerald-100/50 flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                  <img src="/google.png" alt="Google" className="w-6 h-6" />
+                  <Image src="/google.png" alt="Google" className="w-6 h-6" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-slate-800">Google Inbox</p>

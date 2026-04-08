@@ -4,11 +4,11 @@ import React, { useState } from "react";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { GalleryVerticalEnd, Mail, Lock, ShieldCheck, ArrowRight, ArrowLeft } from "lucide-react";
+import { GalleryVerticalEnd, Mail, Lock, ShieldCheck, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import Image from "next/image";
 export default function ResetPage() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -26,8 +26,16 @@ export default function ResetPage() {
         description: "Your password has been successfully updated."
       });
       router.push("/login");
-    } catch (err: any) {
-      const msg = err?.response?.data?.message ?? err?.message ?? "Password reset failed";
+    } catch (err: unknown) {
+      const msg =
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : err instanceof Error
+            ? err.message
+            : "Password reset failed";
       toast.error("Reset Failed", {
         description: msg
       });
@@ -119,10 +127,12 @@ export default function ResetPage() {
         </div>
       </div>
       <div className="relative hidden bg-slate-100 lg:block overflow-hidden">
-        <img
+        <Image
           src="/puzzul.jpg"
           alt="Security visual"
           className="absolute inset-0 h-full w-full object-cover grayscale opacity-20"
+          width={800}
+          height={600}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/40 to-slate-900/90 flex flex-col justify-center p-16 text-white">
           <ShieldCheck size={64} className="mb-8 opacity-80" />

@@ -22,14 +22,37 @@ interface SidebarProps {
   toggle: () => void
 }
 
+type HistoryItem = {
+  _id: string;
+  latestMessage?: string;
+};
+
+type HistoryResponse = {
+  ok?: boolean;
+  history?: HistoryItem[];
+};
+
 export default function Sidebar({ isOpen, toggle }: SidebarProps) {
   const { isAuthenticated, user, refresh } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentConversationId = searchParams?.get("conversationId");
 
-  const [recentHistory, setRecentHistory] = useState<any[]>([]);
+  const [recentHistory, setRecentHistory] = useState<HistoryItem[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  const getDeletedIds = (): string[] => {
+    const raw = localStorage.getItem("deletedIds") || "[]";
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((id): id is string => typeof id === "string");
+      }
+    } catch {
+      // fallback below for malformed localStorage content
+    }
+    return [];
+  };
 
   useEffect(() => {
     const handleOutsideClick = () => setOpenMenuId(null);
@@ -42,7 +65,7 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    const deletedIds = JSON.parse(localStorage.getItem("deletedIds") || "[]");
+    const deletedIds = getDeletedIds();
     if (!deletedIds.includes(id)) {
       deletedIds.push(id);
       localStorage.setItem("deletedIds", JSON.stringify(deletedIds));
@@ -56,13 +79,14 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
     if (isAuthenticated) {
       const fetchHistory = async () => {
         try {
-          const res = await axios.get("http://localhost:8000/api/history", {
+          const res = await axios.get<HistoryResponse>("http://localhost:8000/api/history", {
             withCredentials: true
           });
           if (res.data?.ok) {
-            const deletedIds = JSON.parse(localStorage.getItem("deletedIds") || "[]");
-            const filteredData = res.data.history.filter(
-              (item: any) => !deletedIds.includes(item._id)
+            const deletedIds = getDeletedIds();
+            const history = res.data.history ?? [];
+            const filteredData = history.filter(
+              (item) => !deletedIds.includes(item._id)
             );
             setRecentHistory(filteredData);
           }
@@ -88,7 +112,7 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
       toast.success("Successfully Logged Out");
       await refresh();
       router.push("/login");
-    } catch (error) {
+    } catch {
       toast.error("Logout Failed");
     }
   };
@@ -136,7 +160,7 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
           <div className="mb-4">
             <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recent Activity</h3>
             <div className="space-y-1">
-              {recentHistory.map((chat: any, idx) => {
+              {recentHistory.map((chat, idx) => {
                 const isActive = currentConversationId === chat._id;
                 return (
                   <div
@@ -223,7 +247,7 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
                 href="/login"
                 className="block w-full py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-95"
               >
-                Sign In
+                Login
               </Link>
             </div>
           )

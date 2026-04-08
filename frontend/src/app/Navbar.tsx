@@ -1,13 +1,8 @@
 "use client";
-import React, { useState } from "react";
 import { Zap } from "lucide-react";
 import Link from "next/link";
 
-interface NavbarProps {
-}
-
-export default function Navbar({ }: NavbarProps) {
-  const [active, setActive] = useState<"login" | "signup" | null>(null);
+export default function Navbar() {
 
   return (
     <nav className="fixed top-0 right-0 left-0 z-[80] bg-slate-950 border-b border-slate-800/50 transition-all duration-300">
@@ -34,7 +29,7 @@ export default function Navbar({ }: NavbarProps) {
             href="/register"
             className="relative px-5 py-2 text-[13px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-full transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md shadow-indigo-500/10"
           >
-            Sign Up
+            Register
           </Link>
         </div>
       </div>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -8,7 +8,6 @@ import {
   Zap,
   History,
   MoreHorizontal,
-  LayoutGrid
 } from "lucide-react";
 import Link from "next/link";
 

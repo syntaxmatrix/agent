@@ -4,7 +4,7 @@ import LogoutHandler from "@/components/LogoutHandler";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata = {
-  title: "Agentic AI - Assistant v2.6",
+  title: "Agentic AI - Assistant v0.2",
   description: "Modern SaaS AI assistant for achieving great things.",
 };
 
