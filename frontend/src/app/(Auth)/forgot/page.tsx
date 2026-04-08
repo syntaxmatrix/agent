@@ -20,13 +20,7 @@ export default function ForgotPage() {
     if (!email) return toast.error("Email is required");
     setLoading(true);
     try {
-      // The backend /otp route is GET in user.routes, but let's try POST first as a courtesy // Refactor Needs...
-      try {
-        await axios.post("/api/user/otp", { email });
-      } catch (e) {
-        await axios.get("/api/user/otp", { params: { email } });
-        console.warn("POST /otp failed, fallback to GET", e); 
-      }
+        await axios.post("/api/user/otp", { email }, {withCredentials: true });
       toast.success("Verification Code Sent", {
         description: "Check your inbox for the security code."
       });

@@ -166,13 +166,6 @@ export default function AccountPage() {
           </div>
 
           <div className="space-y-4 pt-2">
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all cursor-pointer" onClick={requestSecurityCode}>
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Security OTP</p>
-                <p className="text-xs text-slate-500">Send one-time password to email</p>
-              </div>
-              <ArrowRight size={18} className="text-slate-300 group-hover:text-slate-900 transition-colors" />
-            </div>
 
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all cursor-pointer" onClick={() => router.push('/forgot')}>
               <div className="space-y-1">
@@ -198,7 +191,7 @@ export default function AccountPage() {
             <div className="p-5 rounded-2xl bg-slate-50 border border-emerald-100/50 flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                  <Image src="/google.png" alt="Google" className="w-6 h-6" />
+                  <Image src="/google.png" alt="Google" className="w-6 h-6 " width={24} height={24} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-slate-800">Google Inbox</p>
@@ -259,7 +252,7 @@ export default function AccountPage() {
           </div>
           <div>
             <h3 className="text-lg font-bold text-slate-900 leading-tight">Session Access</h3>
-            <p className="text-sm text-slate-500 font-medium">Terminate current session and sign out safely.</p>
+            <p className="text-sm text-slate-500 font-medium">Terminate current session and logout safely.</p>
           </div>
         </div>
         <Button 
@@ -268,7 +261,7 @@ export default function AccountPage() {
           onClick={logout}
           disabled={loading}
         >
-          Sign Out Now
+          Logout Now
         </Button>
       </section>
     </div>

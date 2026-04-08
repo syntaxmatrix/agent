@@ -5,7 +5,7 @@ import {
   checkUsernameAvailability,
   verifyEmailID,
   sendSecurityCodeLogged,
-  sendSecurityCode,
+  sendSecurityCodeForgetPassword,
   passwordReset,
   loginUser,
   logoutUser,
@@ -35,8 +35,8 @@ router.route("/register").post(registerUser); // example.com/api/v1/user/registe
 // LOGIN USER
 router.route("/login").post(loginUser); // example.com/api/v1/user/login
 
-// Support both GET (query) and POST (body) for OTP so frontend callers work
-router.route("/otp").get(sendSecurityCode).post(sendSecurityCode); // example.com/api/v1/user/otp
+// Request Security Code(OTP) for Forget Password Only
+router.route("/otp").post(sendSecurityCodeForgetPassword)// example.com/api/v1/user/otp
 
 // ## Unsecured Routes #Ends
 
@@ -64,7 +64,7 @@ router.route("/logout").post(auth_middleware,logoutUser); // example.com/api/v1/
 // Get current authenticated user
 router.route("/me").get(auth_middleware, getMe); // example.com/api/v1/user/me
 
-// SEND SECURITY CODE(OTP) TO USER
+// SEND SECURITY CODE(OTP) TO LOGGED-IN USER for Sensitive Actions (like password change, etc.)
 router.route("/requestsecuritycode").post(auth_middleware,sendSecurityCodeLogged); // example.com/api/v1/user/requestsecuritycode
 
 // ## GOOGLE GMAIL OAUTH2 #Starts

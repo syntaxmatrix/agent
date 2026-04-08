@@ -657,62 +657,89 @@ const sendSecurityCodeLogged = asyncHandler(async (req, res) => {
 
   // Sending verification email
   try {
-    await sendVerificationEmail(email, name, verifyCodeGen);
-    console.log(`Verification email sent to ${email}`);
-  } catch (err) {
-    console.error(`Email sending failed: ${err.message}`);
-    throw new APIError(500, "Password Reset failed email");
-  }
-  console.log("Send Verification Code Route End");
-  return res
-    .status(200)
-    .json(new APIResponse(200, {}, "Verification Code sent Successfully"));
-});
-
-/**
- * Sends Security code for Password Reset.
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- */
-const sendSecurityCode = asyncHandler(async (req, res) => {
-  // Password-reset security code request payload.
-  // Accept email from either body (POST) or query (GET) to support both client calls.
-  const email = req.body?.email ?? req.query?.email;
-
-  if (!email) {
-    throw new APIError(400, "Email is required to send security code");
-  }
-
-  const user = await User.findOne({ email: String(email) });
-
-  if (!user) {
-    throw new APIError(404, "User with this email doesn't exist");
-  }
-
-  console.log(user);
-
-  const name = user.name;
-  // Generate verification code
-  const verifyCodeGen = genVerificationCode();
-  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
-
-  user.securityCode = verifyCodeGen;
-  user.securityCodeExpiry = verifyCodeExpiry;
-
-  await user.save({ validateBeforeSave: false }); // Save code in DB
-
-  // Sending verification email
-  try {
     await sendSecurityCodeMail(email, name, verifyCodeGen);
     console.log(`Security code email sent to ${email}`);
   } catch (err) {
     console.error(`Email sending failed: ${err.message}`);
-    throw new APIError(500, "Password Reset failed email");
+    throw new APIError(500, "Security code failed email");
   }
   console.log("Send Security Code Route End");
   return res
     .status(200)
     .json(new APIResponse(200, {}, "Security Code sent Successfully"));
+});
+
+/**
+ * Sends Security code for Password Forget.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const sendSecurityCodeForgetPassword = asyncHandler(async (req, res) => {
+  const email = req.body?.email;
+
+  if (!email) {
+    throw new APIError(400, "Email is required");
+  }
+
+  // 1. Check for existing reset token to track attempts
+  const existingToken = req.cookies?.token_reset;
+  let currentCnt = 3; // Default for first-time request
+
+  if (existingToken) {
+    try {
+      const decoded = jwt.verify(existingToken, process.env.SECRET);
+      
+      // Safety check: ensure the email matches the token
+      if (decoded.email !== email) {
+        throw new APIError(400, "Invalid session for this email");
+      }
+
+      currentCnt = decoded.cnt;
+
+      // 2. Check if attempts are exhausted
+      if (currentCnt <= 0) {
+        throw new APIError(429, "Too many attempts. Please try again after 1 hour.");
+      }
+    } catch (err) {
+      // If token is expired, we let them start over with a fresh 3 attempts 
+      // or you can handle expiration more strictly based on your security policy.
+      currentCnt = 3;
+    }
+  }
+
+  const user = await User.findOne({ email: String(email) });
+  if (!user) {
+    throw new APIError(404, "User with this email doesn't exist");
+  }
+
+  // 3. Generate new code and save to User
+  const verifyCodeGen = genVerificationCode();
+  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); 
+
+  user.securityCode = verifyCodeGen;
+  user.securityCodeExpiry = verifyCodeExpiry;
+  await user.save({ validateBeforeSave: false });
+
+  // 4. Create NEW token with decremented count
+  // We subtract 1 from the current count
+  const nextCnt = currentCnt - 1;
+  const token_reset = jwt.sign(
+    { email, cnt: nextCnt }, 
+    process.env.SECRET, 
+    { expiresIn: process.env.TEMP_TOKEN_EXPIRY }
+  );
+
+  try {
+    await sendVerificationEmail(email, user.name, verifyCodeGen);
+  } catch (err) {
+    throw new APIError(500, "Failed to send email");
+  }
+
+  // 5. Return response with the updated cookie
+  return res
+    .status(200)
+    .cookie("token_reset", token_reset, cookieOptions)
+    .json(new APIResponse(200, { attemptsLeft: nextCnt }, "Security Code sent successfully"));
 });
 
 /**
@@ -722,11 +749,24 @@ const sendSecurityCode = asyncHandler(async (req, res) => {
  */
 const passwordReset = asyncHandler(async (req, res) => {
 
-  // Email identifies target account for password reset flow.
-  const email = req.body.email;
+  const secret = process.env.SECRET;
+
+  const accessToken = req.cookies?.accessToken;
+
+  const emailtkn = req.cookies?.token_reset; // token for password forget initiation
+
+  if (!accessToken || !emailtkn) {
+    if (!emailtkn) {
+      throw new APIError(404, "No token found for password reset initiation.");
+    } else{
+      throw new APIError(404, "No accessToken cookie found for password reset.");
+    }
+  }
+
+  const { email } = await jwt.verify(accessToken, secret) || await jwt.verify(emailtkn, secret);
 
   if (!email) {
-    throw new APIError(400, "Email is required for password reset");
+    throw new APIError(400, "Email ID is required");
   }
 
   const { password, securityCode } = req.body;
@@ -769,7 +809,7 @@ export {
   checkUsernameAvailability,
   verifyEmailID,
   sendSecurityCodeLogged,
-  sendSecurityCode,
+  sendSecurityCodeForgetPassword,
   passwordReset,
   loginUser,
   logoutUser,
