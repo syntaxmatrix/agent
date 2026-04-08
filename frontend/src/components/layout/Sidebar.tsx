@@ -224,10 +224,10 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
               <User size={20} />
             </div>
             {isOpen && (
-              <div className="flex-1 min-w-0">
+              <Link href="/account" className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
                 <p className="text-[10px] text-slate-500 truncate font-medium uppercase tracking-tight">{user.email}</p>
-              </div>
+              </Link>
             )}
             {isOpen && (
               <button 

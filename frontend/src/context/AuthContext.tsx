@@ -7,6 +7,9 @@ type AuthUser = {
   _id?: string;
   name?: string;
   email?: string;
+  username?: string;
+  googleConnected?: boolean;
+  isVerified?: boolean;
 };
 
 type MeResponse = {

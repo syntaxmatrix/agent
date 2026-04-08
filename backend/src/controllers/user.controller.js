@@ -583,6 +583,7 @@ const gmailLink = asyncHandler(async (req, res) => {
       // END OF SECTION
 
       user.googleRefreshToken = googleRefreshToken; //Saving Google Refresh Token in MongoDB
+      user.googleConnected = true; // Mark that user has linked Google account
 
       const name = user.name;
 

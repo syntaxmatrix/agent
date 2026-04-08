@@ -8,7 +8,8 @@ import { useAuth } from "@/context/AuthContext";
 import { 
   User, 
   Mail, 
-  ShieldCheck, 
+  ShieldCheck,
+  CheckCircle2,
   LogOut, 
   Globe, 
   ArrowRight,
@@ -29,7 +30,7 @@ export default function AccountPage() {
     setLoading(true);
     try {
       await axios.post("/api/user/requestsecuritycode");
-      toast.success("Verification Code Sent", {
+      toast.success("Security Code Sent", {
         description: "Check your email for the 6-digit security code."
       });
     } catch (err: unknown) {
@@ -135,20 +136,26 @@ export default function AccountPage() {
           </div>
           <div className="space-y-4 flex-1">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{user.name}</h1>
+              <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center justify-center md:justify-start gap-2">
+                {user.name}
+                {user.isVerified && <CheckCircle2 size={20} className="text-emerald-500" />}
+              </h1>
               <p className="text-slate-500 font-medium flex items-center justify-center md:justify-start gap-1.5 pt-1">
                 <Mail size={16} className="text-slate-400" />
                 {user.email}
               </p>
+              <p className="text-slate-400 text-sm font-semibold pt-1">@{user.username || "username"}</p>
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
               <span className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-slate-200/50">
                 Member ID: {user._id?.slice(-8).toUpperCase()}
               </span>
-              <span className="px-3 py-1 bg-indigo-50 rounded-full text-[10px] font-bold text-indigo-600 uppercase tracking-widest border border-indigo-100 flex items-center gap-1.5">
-                <ShieldCheck size={12} />
-                Verified
-              </span>
+              {user.isVerified && (
+                <span className="px-3 py-1 bg-emerald-50 rounded-full text-[10px] font-bold text-emerald-700 uppercase tracking-widest border border-emerald-100 flex items-center gap-1.5">
+                  <ShieldCheck size={12} />
+                  Verified
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -167,7 +174,13 @@ export default function AccountPage() {
 
           <div className="space-y-4 pt-2">
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all cursor-pointer" onClick={() => router.push('/forgot')}>
+            <div
+              className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all cursor-pointer"
+              onClick={() => {
+                void requestSecurityCode();
+                router.push('/reset');
+              }}
+            >
               <div className="space-y-1">
                 <p className="text-sm font-bold text-slate-800">Reset Password</p>
                 <p className="text-xs text-slate-500">Initiate a password reset flow</p>
@@ -197,6 +210,11 @@ export default function AccountPage() {
                   <p className="text-sm font-bold text-slate-800">Google Inbox</p>
                   <p className="text-xs text-slate-500 truncate">Manage emails with AI agents</p>
                 </div>
+                {user.googleConnected && (
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    Connected
+                  </span>
+                )}
               </div>
               <Button 
                 variant="outline" 
