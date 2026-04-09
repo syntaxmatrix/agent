@@ -2,9 +2,9 @@
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Mail, Lock } from "lucide-react"
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -14,9 +14,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema, LoginInput } from "@/schemas/auth";
-import axios, { AxiosError } from "axios";
+import axios from "@/lib/axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner"
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
+import Link from "next/link";
 
 export function LoginForm({
   className,
@@ -24,6 +28,7 @@ export function LoginForm({
 }: React.ComponentProps<"form">) {
   const [isSubmiting,setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { refresh } = useAuth();
   //zod
   const form = useForm<LoginInput>({
     resolver:zodResolver(LoginSchema),
@@ -39,6 +44,12 @@ export function LoginForm({
       toast.success("You are Successfully Logged In",{
         description: response.data.message
       })
+      try {
+        // Refresh auth context so client knows user is authenticated
+        await refresh();
+      } catch (e) {
+        console.warn("Failed to refresh auth context after login", e);
+      }
       router.replace("/chats");
       setIsSubmitting(false)
     } catch (error) {
@@ -54,45 +65,47 @@ export function LoginForm({
   return (
     <form className={cn("flex flex-col gap-6", className)} onSubmit={form.handleSubmit(onSubmit)} {...props}>
       <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
-          <p className="text-sm text-balance text-muted-foreground">
-            Enter your email below to login to your account
-          </p>
+        <div className="header">
+          <div className="flex flex-col text-left">
+            <h1 className="text-2xl font-bold">Login to your account</h1>
+          </div>
+          <Link href="/register" className="text-sm font-medium text-primary hover:underline">
+            Sign Up
+          </Link>
         </div>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required {...form.register("email")} />
+          <div className="input-wrapper">
+            <Mail className="input-icon" size={18} />
+            <Input className="input" id="email" type="email" placeholder="m@example.com" required {...form.register("email")} />
+          </div>
         </Field>
         <Field>
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Password</FieldLabel>
-            <a
-              href="#"
+            <Link
+              href="/forgot"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
-            </a>
+            </Link>
           </div>
-          <Input id="password" type="password" required {...form.register("password")} />
+          <div className="input-wrapper">
+            <Lock className="input-icon" size={18} />
+            <Input className="input" id="password" type="password" required {...form.register("password")} />
+          </div>
         </Field>
         <Field>
-          <Button type="submit" disabled={isSubmiting}>
+          <Button className="btn-primary" type="submit" disabled={isSubmiting}>
             {isSubmiting ? "Logging in..." : "Login"} 
           </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
-          <Button variant="outline" type="button" onClick={() => window.location.href = "/google"}>
-            <img src="/google.png" alt="Google" className="mr-2 h-4 w-4" />
+          <Button variant="outline" type="button" onClick={() => window.location.href = "/api/user/google"}>
+            <Image src="/google.png" alt="Google" width={16} height={16} />
             Login with Google
           </Button>
-          <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
-            <a href="/register" className="underline underline-offset-4">
-              Register
-            </a>
-          </FieldDescription>
         </Field>
       </FieldGroup>
     </form>

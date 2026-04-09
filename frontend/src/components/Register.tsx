@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Mail, Lock } from "lucide-react";
 import {
   Field,
   FieldDescription,
@@ -24,6 +25,7 @@ import axios from "@/lib/axios";
 import { AxiosError } from "axios";
 import { toast } from "sonner"
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export function RegisterForm({
   className,
@@ -46,6 +48,28 @@ export function RegisterForm({
   const handleContinue = async () => {
     const isEmailValid = await form.trigger("email");
     if (!isEmailValid) return;
+    // Check email availability with backend
+    try {
+      const email = form.getValues("email");
+      const res = await axios.get("/api/user/emailavailability", { params: { email } });
+      const msg = res.data?.message || "";
+      if (msg.includes("Already Registered")) {
+        toast.error("Email already registered. Try login instead.");
+        return;
+      }
+    } catch (err: unknown) {
+      const m =
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { message?: unknown } } }).response?.data?.message === "string"
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : err instanceof Error
+            ? err.message
+            : "Failed to validate email";
+      toast.error(m);
+      return;
+    }
     setStep(2);
   };
 
@@ -110,15 +134,20 @@ export function RegisterForm({
     <form className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldGroup>
 
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Create an account</h1>
+        <div className="header">
+          <div className="flex flex-col text-left">
+            <h1 className="text-2xl font-bold">Create an account</h1>
+          </div>
+          <a href="/login" className="text-sm font-medium text-primary hover:underline">
+            Login
+          </a>
         </div>
 
         {step === 1 && (
           <>
             <Field>
-              <Button variant="outline" type="button" onClick={() => window.location.href = "/google"}>
-                <img src="/google.png" alt="Google" className="mr-2 h-4 w-4" />
+              <Button variant="outline" type="button" onClick={() => window.location.href = "/api/user/google"}>
+                <Image src="/google.png" alt="Google" width={16} height={16} className="mr-2" />
                 Register with Google
               </Button>
             </Field>
@@ -127,7 +156,10 @@ export function RegisterForm({
 
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input id="email" type="email" placeholder="m@example.com" required {...form.register("email")} />
+              <div className="input-wrapper">
+                <Mail className="input-icon" size={18} />
+                <Input className="input" id="email" type="email" placeholder="m@example.com" required {...form.register("email")} />
+              </div>
               {form.formState.errors.email?.message && (
                 <FieldDescription className="text-red-500">
                   {form.formState.errors.email.message}
@@ -136,7 +168,7 @@ export function RegisterForm({
             </Field>
 
             <Field>
-              <Button type="button" onClick={handleContinue}>
+              <Button className="btn-primary" type="button" onClick={handleContinue}>
                 Continue
               </Button>
             </Field>
@@ -147,7 +179,10 @@ export function RegisterForm({
           <>
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input id="password" type="password" required {...form.register("password")} />
+              <div className="input-wrapper">
+                <Lock className="input-icon" size={18} />
+                <Input className="input" id="password" type="password" required {...form.register("password")} />
+              </div>
               {form.formState.errors.password?.message && (
                 <FieldDescription className="text-red-500">
                   {form.formState.errors.password.message}
@@ -157,7 +192,10 @@ export function RegisterForm({
 
             <Field>
               <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
-              <Input id="confirmPassword" type="password" required {...form.register("confirmPassword")} />
+              <div className="input-wrapper">
+                <Lock className="input-icon" size={18} />
+                <Input className="input" id="confirmPassword" type="password" required {...form.register("confirmPassword")} />
+              </div>
               {form.formState.errors.confirmPassword?.message && (
                 <FieldDescription className="text-red-500">
                   {form.formState.errors.confirmPassword.message}
@@ -166,7 +204,7 @@ export function RegisterForm({
             </Field>
 
             <Field>
-              <Button type="button" disabled={isSubmitting} onClick={form.handleSubmit(handleRegister)}>
+              <Button className="btn-primary" type="button" disabled={isSubmitting} onClick={form.handleSubmit(handleRegister)}>
                 {isSubmitting ? "Registering..." : "Register"}
               </Button>
             </Field>
@@ -189,19 +227,14 @@ export function RegisterForm({
   </InputOTPGroup>
 </InputOTP>
 <Field>
-  <Button type="button" disabled={isSubmitting || otpCode.length !== 6} onClick={handleVerifyEmail}>
+  <Button className="btn-primary" type="button" disabled={isSubmitting || otpCode.length !== 6} onClick={handleVerifyEmail}>
     {isSubmitting ? "Verifying..." : "Verify OTP"}
   </Button>
 </Field>
 </>
         )}
 
-        <FieldDescription className="text-center">
-          Already have an account?{" "}
-          <a href="/login" className="underline underline-offset-4">
-            Login
-          </a>
-        </FieldDescription>
+
 
       </FieldGroup>
     </form>

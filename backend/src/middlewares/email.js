@@ -11,7 +11,6 @@ export const getEmail = asyncHandler(async (req, res, next) => {
   }
   //Decode the email (prevents encoding issues)
   const decodedEmail = decodeURIComponent(email);
-
   const bytes = CryptoJS.AES.decrypt(decodedEmail, secret);
   const decryptEmail = bytes.toString(CryptoJS.enc.Utf8);
 

@@ -40,11 +40,16 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 /**
  * Default cookies options.
+ * - `secure` must only be true in production (HTTPS). Browsers won't accept
+ *   secure cookies over plain HTTP during local development.
+ * - `sameSite` is set to "None" in production to allow cross-site usage when
+ *   frontend and backend are on different origins; in development we use
+ *   "Lax" to improve compatibility.
  */
 const cookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: "None",
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
 };
 
 /**
@@ -155,11 +160,11 @@ const registerUser = asyncHandler(async (req, res) => {
     );
   }
 
-  // Cookie options for tempToken
+  // Cookie options for tempToken (follow same env rules as `cookieOptions`)
   const tempTokenCookieOptions = {
     httpOnly: true,
-    secure: true,
-    sameSite: "None", // critical for cross-origin cookies
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     maxAge: 1000 * 60 * 15, // 15 min expiry for tempToken
   };
   console.log("Regsiter Route End");
@@ -427,7 +432,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     // Persist local auth cookies after Google login/upsert.
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
-    .redirect(`${process.env.DOMAIN}/chat?message=${encodeURIComponent(messageSuccess)}`);
+    .redirect(`${process.env.DOMAIN}/chats?message=${encodeURIComponent(messageSuccess)}`);
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -455,7 +460,7 @@ const getEncryptedEmail = asyncHandler(async (req, res) => {  // #Need to Remove
   if (!accessToken) {
     throw new APIError(404, "No accessToken cookie found for Google Auth.");
   }
-  const { email } = jwt.verify(accessToken, secret);
+  const { email } = await jwt.verify(accessToken, secret);
 
   if (!email) {
     throw new APIError(400, "Email ID is required");
@@ -477,6 +482,18 @@ const getEncryptedEmail = asyncHandler(async (req, res) => {  // #Need to Remove
         "Successfully Encrypted Email for Googgle Auth"
       )
     );
+});
+
+/**
+ * Return current authenticated user (safe fields).
+ */
+const getMe = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    throw new APIError(401, "Unauthorized");
+  }
+  // req.user is already selected without password and refreshToken in auth middleware
+  return res.status(200).json(new APIResponse(200, { user }, "User fetched"));
 });
 
 
@@ -566,6 +583,7 @@ const gmailLink = asyncHandler(async (req, res) => {
       // END OF SECTION
 
       user.googleRefreshToken = googleRefreshToken; //Saving Google Refresh Token in MongoDB
+      user.googleConnected = true; // Mark that user has linked Google account
 
       const name = user.name;
 
@@ -640,61 +658,89 @@ const sendSecurityCodeLogged = asyncHandler(async (req, res) => {
 
   // Sending verification email
   try {
-    await sendVerificationEmail(email, name, verifyCodeGen);
-    console.log(`Verification email sent to ${email}`);
-  } catch (err) {
-    console.error(`Email sending failed: ${err.message}`);
-    throw new APIError(500, "Password Reset failed email");
-  }
-  console.log("Send Verification Code Route End");
-  return res
-    .status(200)
-    .json(new APIResponse(200, {}, "Verification Code sent Successfully"));
-});
-
-/**
- * Sends Security code for Password Reset.
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- */
-const sendSecurityCode = asyncHandler(async (req, res) => {
-  // Password-reset security code request payload.
-  const email = req.body.email;
-
-  if (!email) {
-    throw new APIError(400, "Email is required to send security code");
-  }
-
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    throw new APIError(404, "User with this email doesn't exist");
-  }
-
-  console.log(user);
-
-  const name = user.name;
-  // Generate verification code
-  const verifyCodeGen = genVerificationCode();
-  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
-
-  user.securityCode = verifyCodeGen;
-  user.securityCodeExpiry = verifyCodeExpiry;
-
-  await user.save({ validateBeforeSave: false }); // Save code in DB
-
-  // Sending verification email
-  try {
     await sendSecurityCodeMail(email, name, verifyCodeGen);
     console.log(`Security code email sent to ${email}`);
   } catch (err) {
     console.error(`Email sending failed: ${err.message}`);
-    throw new APIError(500, "Password Reset failed email");
+    throw new APIError(500, "Security code failed email");
   }
   console.log("Send Security Code Route End");
   return res
     .status(200)
     .json(new APIResponse(200, {}, "Security Code sent Successfully"));
+});
+
+/**
+ * Sends Security code for Password Forget.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const sendSecurityCodeForgetPassword = asyncHandler(async (req, res) => {
+  const email = req.body?.email;
+
+  if (!email) {
+    throw new APIError(400, "Email is required");
+  }
+
+  // 1. Check for existing reset token to track attempts
+  const existingToken = req.cookies?.token_reset;
+  let currentCnt = 3; // Default for first-time request
+
+  if (existingToken) {
+    try {
+      const decoded = jwt.verify(existingToken, process.env.SECRET);
+      
+      // Safety check: ensure the email matches the token
+      if (decoded.email !== email) {
+        throw new APIError(400, "Invalid session for this email");
+      }
+
+      currentCnt = decoded.cnt;
+
+      // 2. Check if attempts are exhausted
+      if (currentCnt <= 0) {
+        throw new APIError(429, "Too many attempts. Please try again after 1 hour.");
+      }
+    } catch (err) {
+      // If token is expired, we let them start over with a fresh 3 attempts 
+      // or you can handle expiration more strictly based on your security policy.
+      currentCnt = 3;
+    }
+  }
+
+  const user = await User.findOne({ email: String(email) });
+  if (!user) {
+    throw new APIError(404, "User with this email doesn't exist");
+  }
+
+  // 3. Generate new code and save to User
+  const verifyCodeGen = genVerificationCode();
+  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); 
+
+  user.securityCode = verifyCodeGen;
+  user.securityCodeExpiry = verifyCodeExpiry;
+  await user.save({ validateBeforeSave: false });
+
+  // 4. Create NEW token with decremented count
+  // We subtract 1 from the current count
+  const nextCnt = currentCnt - 1;
+  const token_reset = jwt.sign(
+    { email, cnt: nextCnt }, 
+    process.env.SECRET, 
+    { expiresIn: process.env.TEMP_TOKEN_EXPIRY }
+  );
+
+  try {
+    await sendVerificationEmail(email, user.name, verifyCodeGen);
+  } catch (err) {
+    throw new APIError(500, "Failed to send email");
+  }
+
+  // 5. Return response with the updated cookie
+  return res
+    .status(200)
+    .cookie("token_reset", token_reset, cookieOptions)
+    .json(new APIResponse(200, { attemptsLeft: nextCnt }, "Security Code sent successfully"));
 });
 
 /**
@@ -704,11 +750,24 @@ const sendSecurityCode = asyncHandler(async (req, res) => {
  */
 const passwordReset = asyncHandler(async (req, res) => {
 
-  // Email identifies target account for password reset flow.
-  const email = req.body.email;
+  const secret = process.env.SECRET;
+
+  const accessToken = req.cookies?.accessToken;
+
+  const emailtkn = req.cookies?.token_reset; // token for password forget initiation
+
+  if (!accessToken || !emailtkn) {
+    if (!emailtkn) {
+      throw new APIError(404, "No token found for password reset initiation.");
+    } else{
+      throw new APIError(404, "No accessToken cookie found for password reset.");
+    }
+  }
+
+  const { email } = await jwt.verify(accessToken, secret) || await jwt.verify(emailtkn, secret);
 
   if (!email) {
-    throw new APIError(400, "Email is required for password reset");
+    throw new APIError(400, "Email ID is required");
   }
 
   const { password, securityCode } = req.body;
@@ -751,11 +810,12 @@ export {
   checkUsernameAvailability,
   verifyEmailID,
   sendSecurityCodeLogged,
-  sendSecurityCode,
+  sendSecurityCodeForgetPassword,
   passwordReset,
   loginUser,
   logoutUser,
   registerUserGoogle,
   getEncryptedEmail,
-  gmailLink
+  gmailLink,
+  getMe,
 };

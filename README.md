@@ -1,7 +1,7 @@
 # 🤖 Agent (AI Agent Platform)
 
 Agent is an **AI-powered agent platform** that executes natural language commands across multiple apps (Gmail, GitHub, Google Sheets, Notion, Slack, etc.).  
-It’s inspired by **Bhindi AI** and built as a team project using a modular **monorepo** setup.
+Built as a team project using a modular **monorepo** setup.
 
 ---
 

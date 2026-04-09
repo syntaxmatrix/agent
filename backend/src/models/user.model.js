@@ -37,6 +37,7 @@ const userSchema = new Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "Chat", default: null },
     ],
     googleRefreshToken: { type: String, default: null },
+    googleConnected: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

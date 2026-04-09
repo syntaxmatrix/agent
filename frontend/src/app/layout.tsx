@@ -1,9 +1,12 @@
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
+import LogoutHandler from "@/components/LogoutHandler";
+import { AuthProvider } from "@/context/AuthContext";
+import { ProductName, Version } from "@/constant"
 
 export const metadata = {
-  title: "Agentic AI",
-  description: "Autonomous AI Agent System",
+  title: `${ProductName} - Assistant ${Version}`,
+  description: "Modern SaaS AI assistant for achieving great things.",
 };
 
 export default function RootLayout({
@@ -13,9 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        {children}
-        <Toaster richColors/>
+      <body suppressHydrationWarning className="antialiased min-h-screen">
+        <AuthProvider>
+          <LogoutHandler />
+          {children}
+          <Toaster richColors />
+        </AuthProvider>
       </body>
     </html>
   );
