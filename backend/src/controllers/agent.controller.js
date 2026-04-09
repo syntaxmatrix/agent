@@ -18,6 +18,7 @@ function cleanJsonString(str) {
 }
 
 import Message from "../models/message.model.js";
+import { body } from "framer-motion/client";
 
 /**
  * Test Function for Gemini Response.
@@ -127,7 +128,9 @@ async function GmailAgent(text, query, googleRefreshToken, context){
     const emailContent = await draftMail(`${context ? "Chat History:\n" + context + "\n\n" : ""}User request: ${query}`);
     // Handle send email logic using emailContent
     // Send via Gmail integration using stored refresh token for auth.
-    return await sendgmail(oauth2ClientGmail,text.entities.to, emailContent.subject, emailContent.body,googleRefreshToken);
+    const data = await sendgmail(oauth2ClientGmail,text.entities.to, emailContent.subject, emailContent.body,googleRefreshToken);
+    const res = { body: "Email sent successfully! to " + text.entities.to , data: data };
+    return res;
   } else if(text.intent === "read_email"){
     // Handle read email logic
   } else {
