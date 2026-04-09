@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { model_chat, model_intent } from "../constant.js";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -6,7 +7,7 @@ const ai = new GoogleGenAI({
 
 async function routeQuery(query) {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: model_intent,
 
     contents: `
 You are a router for an AI assistant.
@@ -54,7 +55,7 @@ User query: "${query}"
 
 async function chatQuery(query) {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: model_chat,
 
     contents: `
 You are an AI assistant.
@@ -87,7 +88,7 @@ User query: "${query}"
 
 async function draftMail(query) {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: model_chat,
 
     contents: `
 You are a professional email writer.

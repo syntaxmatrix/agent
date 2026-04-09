@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
-
+import "styled-jsx/style";
 export default function DashboardPage() {
   const { user } = useAuth();
   const userName = user?.name || "Agentic AI";
@@ -122,7 +122,7 @@ export default function DashboardPage() {
         ))}
       </section>
 
-      <style jsx global>{`
+      <style>{`
         * {
           transition: all 0.2s ease-in-out;
         }
