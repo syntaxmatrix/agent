@@ -1,4 +1,5 @@
 import "./globals.css";
+export const dynamic = 'force-dynamic';
 import { Toaster } from "@/components/ui/sonner";
 import LogoutHandler from "@/components/LogoutHandler";
 import { AuthProvider } from "@/context/AuthContext";
@@ -20,7 +21,7 @@ export default function RootLayout({
         <AuthProvider>
           <LogoutHandler />
           {children}
-          <Toaster richColors />
+          <Toaster/>
         </AuthProvider>
       </body>
     </html>

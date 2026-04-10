@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ErrorRedirectPage() {
@@ -16,8 +16,10 @@ export default function ErrorRedirectPage() {
   }, []);
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <div className="min-h-screen flex items-center justify-center">
       <p className="text-lg">Handling error... Redirecting</p>
     </div>
+    </Suspense>
   );
 }

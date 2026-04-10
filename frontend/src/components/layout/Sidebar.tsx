@@ -11,12 +11,14 @@ import {
   MoreHorizontal
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useAuth } from "@/context/AuthContext"
 import axios from "@/lib/axios"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter} from "next/navigation"
 import { toast } from "sonner"
 import Link from "next/link"
 import { ProductName } from "@/constant"
+import { useContext } from "react"
+import AuthContext from "@/context/AuthContext"
+
 
 interface SidebarProps {
   isOpen: boolean
@@ -34,10 +36,17 @@ type HistoryResponse = {
 };
 
 export default function Sidebar({ isOpen, toggle }: SidebarProps) {
-  const { isAuthenticated, user, refresh } = useAuth();
+  const auth = useContext(AuthContext);
+  const isAuthenticated = auth?.isAuthenticated ?? false;
+  const user = auth?.user ?? null;
+  const refresh = auth?.refresh ?? (async () => {});
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentConversationId = searchParams?.get("conversationId");
+const [currentConversationId, setCurrentConversationId] = React.useState<string | null>(null);
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  setCurrentConversationId(params.get("conversationId"));
+}, []);
 
   const [recentHistory, setRecentHistory] = useState<HistoryItem[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);

@@ -1,13 +1,15 @@
 "use client"
 
-import React from "react";
+import React, { useContext } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import AuthContext from "@/context/AuthContext";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
 
 export default function UserMenu() {
-  const { user, loading } = useAuth();
+  const auth = useContext(AuthContext);
+  const user = auth?.user ?? null;
+  const loading = auth?.loading ?? true;
   const router = useRouter();
 
   if (loading) return <div className="px-4">...</div>;

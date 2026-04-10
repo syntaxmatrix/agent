@@ -1,8 +1,8 @@
 
 import { RegisterForm } from "@/components/Register"
 import { ProductName } from "@/constant"
-import { GalleryVerticalEnd, Link } from "lucide-react"
-    
+import { GalleryVerticalEnd} from "lucide-react"
+import Link from "next/link"
 
 export default function RegisterPage() {
   return (

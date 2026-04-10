@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react";
+import { useEffect , Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ChatRedirectPage() {
@@ -19,8 +19,10 @@ export default function ChatRedirectPage() {
   }, []);
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <div className="min-h-screen flex items-center justify-center">
       <p className="text-lg">Redirecting to chat...</p>
     </div>
+    </Suspense>
   );
 }

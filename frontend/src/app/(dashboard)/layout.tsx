@@ -2,7 +2,6 @@
 
 import React, { useState } from "react"
 import RequireAuth from "@/components/RequireAuth";
-import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/layout/Sidebar"
 import Header from "@/components/layout/Header"
 import { cn } from "@/lib/utils"
@@ -13,23 +12,16 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const { loading } = useAuth(); 
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
-  }
-
   return (
     <div className="min-h-screen flex bg-background text-foreground overflow-hidden">
-      {/* Sidebar - Fixed */}
       <Sidebar 
         isOpen={isSidebarOpen} 
         toggle={toggleSidebar} 
       />
       
-      {/* Main Content Area */}
       <div 
         className={cn(
           "flex-1 flex flex-col h-screen sidebar-transition",
